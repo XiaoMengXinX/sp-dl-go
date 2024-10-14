@@ -17,7 +17,7 @@ var cdmData []byte
 func readCDMs() []string {
 	cdms, err := filepath.Glob(filepath.Join("cdm", "*.wvd"))
 	if err != nil || len(cdms) == 0 {
-		log.Fatal("No CDMs found") // 使用自定义日志系统的Fatal函数
+		log.Fatal(`No CDMs found in "./cdm" folder`) // 使用自定义日志系统的Fatal函数
 	}
 	cdmData, err = os.ReadFile(cdms[0])
 	if err != nil {
