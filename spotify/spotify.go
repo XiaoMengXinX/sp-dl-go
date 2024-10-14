@@ -13,16 +13,28 @@ import (
 )
 
 const (
-	Quality128MP4    = "MP4_128_DUAL"
-	Quality256MP4    = "MP4_256_DUAL"
-	Quality96Vorbis  = "OGG_VORBIS_96"
-	Quality160Vorbis = "OGG_VORBIS_160"
-	Quality320Vorbis = "OGG_VORBIS_320"
+	Quality128MP4     = "MP4_128"
+	Quality128MP4Dual = "MP4_128_DUAL"
+	Quality256MP4     = "MP4_256"
+	Quality256MP4Dual = "MP4_256_DUAL"
+	Quality96Vorbis   = "OGG_VORBIS_96"
+	Quality160Vorbis  = "OGG_VORBIS_160"
+	Quality320Vorbis  = "OGG_VORBIS_320"
 )
 
 var (
-	Mp4Formats = []string{Quality128MP4, Quality256MP4}
-	OggFormats = []string{Quality96Vorbis, Quality160Vorbis, Quality320Vorbis}
+	mp4FormatSet = map[string]bool{
+		Quality128MP4:     true,
+		Quality128MP4Dual: true,
+		Quality256MP4:     true,
+		Quality256MP4Dual: true,
+	}
+
+	oggFormatSet = map[string]bool{
+		Quality96Vorbis:  true,
+		Quality160Vorbis: true,
+		Quality320Vorbis: true,
+	}
 )
 
 // Downloader 结构体定义
@@ -39,7 +51,7 @@ type Downloader struct {
 func NewDownloader() *Downloader {
 	return &Downloader{
 		TokenManager: token.NewTokenManager(),
-		Quality:      Quality128MP4,
+		Quality:      Quality128MP4Dual,
 		OutputFolder: "./output",
 	}
 }

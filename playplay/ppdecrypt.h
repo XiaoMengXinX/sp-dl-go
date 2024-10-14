@@ -1,4 +1,3 @@
-// ppdecrypt.h
 #ifndef PPDECRYPT_H
 #define PPDECRYPT_H
 
@@ -14,4 +13,4 @@ void ppdecrypt(const uint8_t key_basis[16], const uint8_t file_id[20], uint8_t d
 }
 #endif
 
-#endif // PPDECRYPT_H
+#endif

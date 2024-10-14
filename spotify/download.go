@@ -13,10 +13,10 @@ import (
 func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	var name, artist, fileID, format string
 	var metadata trackMetadata
-	switch d.Quality {
-	case Quality128MP4, Quality256MP4:
+	switch {
+	case mp4FormatSet[d.Quality]:
 		format = "mp3"
-	case Quality96Vorbis, Quality160Vorbis, Quality320Vorbis:
+	case oggFormatSet[d.Quality]:
 		format = "ogg"
 	default:
 		return fmt.Errorf("invalid quality: %s", d.Quality)
@@ -47,6 +47,8 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	}
 	filename := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
 	outFile := fmt.Sprintf("%s/%s.%s", d.OutputFolder, filename, format)
+
+	log.Infof("Downloading %s [%s]", content, filename)
 
 	defer func(filename string, outFile string, err *error) {
 		if *err != nil {
@@ -146,6 +148,7 @@ func (d *Downloader) Download(url string) (err error) {
 		log.Info("No tracks to download")
 		return nil
 	}
+	log.Infof("Downloading %d track(s)", len(tracks))
 	_, idType, _ := getIDType(url)
 	for _, track := range tracks {
 		switch idType {
