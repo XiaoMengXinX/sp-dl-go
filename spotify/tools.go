@@ -209,9 +209,18 @@ func (e *fileEntry) testFileIDOrFileId() string {
 
 // isSupportedFormat 检查是否为支持的格式
 func (d *Downloader) isSupportedFormat(format string) bool {
-	for _, f := range append(Mp4Formats, OggFormats...) {
-		if f == format {
-			return true
+	switch d.Quality {
+	case Quality128MP4, Quality256MP4:
+		for _, f := range Mp4Formats {
+			if f == format {
+				return true
+			}
+		}
+	case Quality96Vorbis, Quality160Vorbis, Quality320Vorbis:
+		for _, f := range OggFormats {
+			if f == format {
+				return true
+			}
 		}
 	}
 	return false

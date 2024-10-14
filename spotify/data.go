@@ -34,7 +34,17 @@ type showData struct {
 
 // trackMetadata 定义音轨的元数据结构体
 type trackMetadata struct {
-	Name   string `json:"name"`
+	Name  string `json:"name"`
+	Album struct {
+		CoverGroup struct {
+			Image []struct {
+				FileId string `json:"file_id"`
+				Size   string `json:"size"`
+				Width  int    `json:"width"`
+				Height int    `json:"height"`
+			} `json:"image"`
+		} `json:"cover_group"`
+	} `json:"album"`
 	Artist []struct {
 		Name string `json:"name"`
 	} `json:"artist"`
@@ -53,6 +63,11 @@ type episodeMetadata struct {
 			Audio   struct {
 				Items []fileEntry `json:"items"`
 			} `json:"audio"`
+			Podcast struct {
+				Data struct {
+					Name string `json:"name"`
+				} `json:"data"`
+			} `json:"podcastV2"`
 		} `json:"episodeUnionV2"`
 	} `json:"data"`
 }

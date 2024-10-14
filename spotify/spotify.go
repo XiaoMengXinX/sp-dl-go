@@ -184,17 +184,16 @@ func (d *Downloader) fetchShowEpisodes(showID string, offset int, episodes []str
 }
 
 // getTrackMetadata 获取音轨的元数据
-func (d *Downloader) getTrackMetadata(trackID string) (name string, artist string, fileID string, err error) {
+func (d *Downloader) getTrackMetadata(trackID string) (name string, artist string, fileID string, metadata trackMetadata, err error) {
 	url := fmt.Sprintf("https://spclient.wg.spotify.com/metadata/4/track/%s", IDToHex(trackID))
 	resp, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Debugf("Fetch track metadata Failed: %v", err)
-		return "", "", "", err
+		return "", "", "", metadata, err
 	}
 
-	var metadata trackMetadata
 	if err := json.Unmarshal(resp, &metadata); err != nil {
-		return "", "", "", fmt.Errorf("failed to decode track metadata: %w", err)
+		return "", "", "", metadata, fmt.Errorf("failed to decode track metadata: %w", err)
 	}
 
 	if len(metadata.Artist) != 0 {
@@ -202,10 +201,10 @@ func (d *Downloader) getTrackMetadata(trackID string) (name string, artist strin
 	}
 	fileID, err = d.selectFromQuality(getAllFiles(metadata))
 	if err != nil {
-		return "", "", "", err
+		return "", "", "", metadata, err
 	}
 
-	return metadata.Name, artist, fileID, nil
+	return metadata.Name, artist, fileID, metadata, nil
 }
 
 // getEpisodeMetadata 获取播客集数的元数据
@@ -242,6 +241,10 @@ func (d *Downloader) getEpisodeMetadata(episodeID string) (name string, creator 
 	fileID, err = d.selectFromQuality(episode.Audio.Items)
 	if err != nil {
 		return "", "", "", err
+	}
+
+	if episode.Creator == "" {
+		episode.Creator = episode.Podcast.Data.Name
 	}
 
 	return episode.Name, episode.Creator, fileID, err
