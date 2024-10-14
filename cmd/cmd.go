@@ -34,8 +34,9 @@ func main() {
 	log.Infof("Set Quality level: %s", *quality)
 
 	sp := spotify.NewDownloader().Initialize()
+	sp.OutputFolder = *output
 	sp.Quality = *quality
-	err := sp.Download("https://open.spotify.com/track/4jTrKMoc44RYZsoFsIlQev?si=76e44f16d7184bc3")
+	err := sp.Download(*id)
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -116,11 +116,6 @@ func (d *Downloader) getOggKeys(fileID string) (key [16]byte, err error) {
 	hexFileID, _ := hex.DecodeString(fileID)
 	obfuscatedKey := [16]byte(playplayResponse.GetObfuscatedKey()[:])
 
-	fmt.Printf("ObfuscatedKey: %x\n", obfuscatedKey)
-	fmt.Printf("hexFileID: %x\n", hexFileID)
-
 	key = playplay.PlayPlayDecrypt(obfuscatedKey, [20]byte(hexFileID[:]))
-
-	fmt.Printf("key: %x\n", key)
 	return key, nil
 }
