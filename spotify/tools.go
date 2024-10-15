@@ -97,6 +97,18 @@ func checkDirExist(dirPath string) error {
 	return nil
 }
 
+func formatArtistsStr(metadata trackMetadata) string {
+	var artists string
+	for i, ar := range metadata.Artist {
+		if i == 0 {
+			artists = ar.Name
+		} else {
+			artists = fmt.Sprintf("%s, %s", artists, ar.Name)
+		}
+	}
+	return artists
+}
+
 func cleanFilename(filename string) string {
 	osType := os.Getenv("GOOS")
 
@@ -133,9 +145,9 @@ func (e *fileEntry) testFileIDOrFileId() string {
 
 func (d *Downloader) isSupportedFormat(format string) bool {
 	switch {
-	case mp4FormatSet[d.quality]:
+	case mp4FormatSet[d.preferQuality]:
 		return mp4FormatSet[format]
-	case oggFormatSet[d.quality]:
+	case oggFormatSet[d.preferQuality]:
 		return oggFormatSet[format]
 	default:
 		return false
@@ -144,7 +156,8 @@ func (d *Downloader) isSupportedFormat(format string) bool {
 
 func (d *Downloader) selectFromQuality(entries []fileEntry) (string, error) {
 	for _, entry := range entries {
-		if entry.Format == d.quality {
+		if entry.Format == d.preferQuality {
+			d.quality = entry.Format
 			return entry.testFileIDOrFileId(), nil
 		}
 	}

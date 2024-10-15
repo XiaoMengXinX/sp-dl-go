@@ -100,7 +100,7 @@ func (d *Downloader) getOggKeys(fileID string) (key [16]byte, err error) {
 
 	var playplayResponse playplay.PlayPlayLicenseResponse
 	if err = proto.Unmarshal(resp, &playplayResponse); err != nil {
-		return key, fmt.Errorf("parse response failrd: %v", err)
+		return key, fmt.Errorf("parse response failed: %v", err)
 	}
 
 	hexFileID, _ := hex.DecodeString(fileID)

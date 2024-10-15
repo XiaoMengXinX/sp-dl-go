@@ -37,16 +37,20 @@ type Downloader struct {
 	TokenManager *token.Manager
 	OutputFolder string
 
-	quality     string
-	clientBases []string
-	licenseURL  string
+	preferQuality string
+	quality       string
+	clientBases   []string
+	licenseURL    string
+
+	skipFormatConvertion bool
+	skipAddingMetadata   bool
 }
 
 func NewDownloader() *Downloader {
 	return &Downloader{
-		TokenManager: token.NewTokenManager(),
-		quality:      Quality128MP4Dual,
-		OutputFolder: "./output",
+		TokenManager:  token.NewTokenManager(),
+		preferQuality: Quality128MP4Dual,
+		OutputFolder:  "./output",
 	}
 }
 
@@ -65,8 +69,21 @@ func (d *Downloader) SetQuality(quality string) error {
 	if mp4FormatSet[quality] != true && oggFormatSet[quality] != true {
 		return fmt.Errorf("%s is not a valid quality format", quality)
 	}
-	d.quality = quality
+	d.preferQuality = quality
 	return nil
+}
+
+func (d *Downloader) SkipFormatConvertion(b bool) *Downloader {
+	d.skipFormatConvertion = b
+	if d.skipFormatConvertion {
+		d.skipAddingMetadata = true
+	}
+	return d
+}
+
+func (d *Downloader) SkipAddingMetadata(b bool) *Downloader {
+	d.skipAddingMetadata = b
+	return d
 }
 
 func (d *Downloader) GetTracks(url string) ([]string, error) {

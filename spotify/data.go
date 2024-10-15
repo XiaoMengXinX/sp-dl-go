@@ -32,6 +32,7 @@ type showData struct {
 type trackMetadata struct {
 	Name  string `json:"name"`
 	Album struct {
+		Name       string `json:"name"`
 		CoverGroup struct {
 			Image []struct {
 				FileId string `json:"file_id"`
