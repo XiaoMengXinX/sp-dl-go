@@ -84,7 +84,7 @@ func (d *Downloader) getOggKeys(fileID string) (key [16]byte, err error) {
 	req := &playplay.PlayPlayLicenseRequest{
 		Version:       protoInt32(2),
 		Token:         reqToken,
-		Interactivity: protoInteractivity(playplay.Interactivity_DOWNLOAD),
+		Interactivity: protoInteractivity(playplay.Interactivity_INTERACTIVE),
 		ContentType:   protoContentType(playplay.ContentType_AUDIO_TRACK),
 	}
 	body, err := proto.Marshal(req)
