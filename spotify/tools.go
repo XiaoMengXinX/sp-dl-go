@@ -152,6 +152,8 @@ func (d *Downloader) selectFromQuality(entries []fileEntry) (string, error) {
 
 	for _, entry := range entries {
 		if d.isSupportedFormat(entry.Format) {
+			log.Debugf("Selected new format: %s", entry.Format)
+			d.quality = entry.Format
 			return entry.testFileIDOrFileId(), nil
 		}
 	}

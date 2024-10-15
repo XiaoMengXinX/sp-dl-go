@@ -63,7 +63,7 @@ func (d *Downloader) Initialize() *Downloader {
 
 func (d *Downloader) SetQuality(quality string) error {
 	if mp4FormatSet[quality] != true && oggFormatSet[quality] != true {
-		return fmt.Errorf("%s is not a valid quality format", d.quality)
+		return fmt.Errorf("%s is not a valid quality format", quality)
 	}
 	d.quality = quality
 	return nil
@@ -173,6 +173,7 @@ func (d *Downloader) getTrackMetadata(trackID string) (name string, artist strin
 	if len(metadata.Artist) != 0 {
 		artist = metadata.Artist[0].Name
 	}
+	log.Debugf("Available formats: %+v", getAllFiles(metadata))
 	fileID, err = d.selectFromQuality(getAllFiles(metadata))
 	if err != nil {
 		return "", "", "", metadata, err
