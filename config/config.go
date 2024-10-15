@@ -8,8 +8,6 @@ import (
 	"os"
 )
 
-const ppToken = "015c8801577620d7d46de9d696bb9574"
-
 var CM = NewConfigManager()
 
 func init() {
@@ -21,7 +19,6 @@ type Data struct {
 	SpDc              string `json:"sp_dc"`
 	AccessToken       string `json:"accessToken"`
 	AccessTokenExpire int64  `json:"accessTokenExpire"`
-	PlayPlayToken     string `json:"playPlayToken"`
 }
 
 // Manager 管理配置的结构体
@@ -37,7 +34,6 @@ func NewConfigManager() *Manager {
 		SpDc:              "",
 		AccessToken:       "",
 		AccessTokenExpire: -1,
-		PlayPlayToken:     ppToken,
 	}
 	return &Manager{
 		configFileName: "config.json",

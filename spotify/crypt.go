@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/XiaoMengXinX/sp-dl-go/config"
 	log "github.com/XiaoMengXinX/sp-dl-go/logger"
 	"github.com/XiaoMengXinX/sp-dl-go/playplay"
 	widevine "github.com/iyear/gowidevine"
@@ -15,7 +14,6 @@ import (
 	"net/http"
 )
 
-// requestPSSH 请求 PSSH
 func requestPSSH(fildID string) (pssh string, err error) {
 	url := fmt.Sprintf("https://seektables.scdn.co/seektable/%s.json", fildID)
 
@@ -25,18 +23,15 @@ func requestPSSH(fildID string) (pssh string, err error) {
 	}
 	defer resp.Body.Close()
 
-	// 检查 HTTP 响应状态码
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("faied to request PSSH with status [%d]", resp.StatusCode)
 	}
 
-	// 解析响应体中的 JSON 数据
 	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return "", fmt.Errorf("faied to request PSSH: %v", err)
 	}
 
-	// 检查并返回 PSSH 字段
 	pssh, ok := result["pssh"].(string)
 	if !ok {
 		log.Debugf("Failed to find PSSH: %+v", result)
@@ -46,7 +41,6 @@ func requestPSSH(fildID string) (pssh string, err error) {
 	return pssh, nil
 }
 
-// getMp4Keys 获取 MP4 解密 key
 func (d *Downloader) getMp4Keys(psshStr string) ([]*widevine.Key, error) {
 	device, err := widevine.NewDevice(
 		widevine.FromWVD(bytes.NewReader(cdmData)),
@@ -86,11 +80,7 @@ func (d *Downloader) getOggKeys(fileID string) (key [16]byte, err error) {
 	protoInteractivity := func(i playplay.Interactivity) *playplay.Interactivity { return &i }
 	protoContentType := func(c playplay.ContentType) *playplay.ContentType { return &c }
 
-	ppToken := config.CM.Get().PlayPlayToken
-	if ppToken == "" {
-		ppToken = config.CM.GetDefault().PlayPlayToken
-	}
-	reqToken, _ := hex.DecodeString(ppToken)
+	reqToken, _ := hex.DecodeString(playplay.PlayPlayToken)
 	req := &playplay.PlayPlayLicenseRequest{
 		Version:       protoInt32(2),
 		Token:         reqToken,

@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// IDType defines the type of Spotify entity.
 type IDType string
 
 const (
@@ -17,7 +16,6 @@ const (
 	EPISODE  IDType = "episode"
 )
 
-// getIDType 从 URI 中提取 ID 类型
 func getIDType(urlID string) (string, IDType, error) {
 	if strings.HasPrefix(urlID, "http") {
 		parsedURL, err := url.Parse(urlID)

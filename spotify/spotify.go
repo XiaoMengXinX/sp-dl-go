@@ -1,15 +1,11 @@
 package spotify
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	log "github.com/XiaoMengXinX/sp-dl-go/logger"
-	"io"
-	"net/http"
-	"time"
-
 	"github.com/XiaoMengXinX/sp-dl-go/token"
+	"net/http"
 )
 
 const (
@@ -37,21 +33,19 @@ var (
 	}
 )
 
-// Downloader 结构体定义
 type Downloader struct {
 	TokenManager *token.Manager
 	OutputFolder string
-	Quality      string
 
+	quality     string
 	clientBases []string
 	licenseURL  string
 }
 
-// NewDownloader 创建 Downloader 实例
 func NewDownloader() *Downloader {
 	return &Downloader{
 		TokenManager: token.NewTokenManager(),
-		Quality:      Quality128MP4Dual,
+		quality:      Quality128MP4Dual,
 		OutputFolder: "./output",
 	}
 }
@@ -67,7 +61,14 @@ func (d *Downloader) Initialize() *Downloader {
 	return d
 }
 
-// GetTracks 获取专辑、播放列表或单曲中的所有音轨
+func (d *Downloader) SetQuality(quality string) error {
+	if mp4FormatSet[quality] != true && oggFormatSet[quality] != true {
+		return fmt.Errorf("%s is not a valid quality format", d.quality)
+	}
+	d.quality = quality
+	return nil
+}
+
 func (d *Downloader) GetTracks(url string) ([]string, error) {
 	url, idType, err := getIDType(url)
 	if err != nil {
@@ -86,42 +87,6 @@ func (d *Downloader) GetTracks(url string) ([]string, error) {
 	}
 }
 
-// makeRequest 执行 HTTP 请求 (GET 或 POST) 并返回响应数据
-func (d *Downloader) makeRequest(method, url string, body []byte) ([]byte, error) {
-	accessToken, _ := d.TokenManager.GetAccessToken()
-	var requestBody io.Reader
-	if body != nil {
-		requestBody = bytes.NewBuffer(body)
-	}
-
-	// 创建 HTTP 请求
-	req, err := http.NewRequest(method, url, requestBody)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
-	req.Header.Set("Accept", "application/json")
-
-	log.Debugf("Using [%s] to request: %s", method, url)
-	log.Debugf("Request Headers: %+v", req.Header)
-
-	// 执行请求
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// 记录请求结果
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request to [%s] failed with status [%d]", url, resp.StatusCode)
-	}
-	return io.ReadAll(resp.Body)
-}
-
-// fetchAlbumTracks 获取专辑中的所有音轨
 func (d *Downloader) fetchAlbumTracks(albumID string, offset int, tracks []string) ([]string, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/albums/%s/tracks?offset=%d&limit=50", albumID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
@@ -145,7 +110,6 @@ func (d *Downloader) fetchAlbumTracks(albumID string, offset int, tracks []strin
 	return tracks, nil
 }
 
-// fetchPlaylistTracks 获取播放列表中的所有音轨
 func (d *Downloader) fetchPlaylistTracks(playlistID string, offset int, tracks []string) ([]string, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/playlists/%s/tracks?offset=%d&limit=100", playlistID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
@@ -171,7 +135,6 @@ func (d *Downloader) fetchPlaylistTracks(playlistID string, offset int, tracks [
 	return tracks, nil
 }
 
-// fetchShowEpisodes 获取播客中的所有集数
 func (d *Downloader) fetchShowEpisodes(showID string, offset int, episodes []string) ([]string, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/shows/%s/episodes?offset=%d&limit=50", showID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
@@ -195,7 +158,6 @@ func (d *Downloader) fetchShowEpisodes(showID string, offset int, episodes []str
 	return episodes, nil
 }
 
-// getTrackMetadata 获取音轨的元数据
 func (d *Downloader) getTrackMetadata(trackID string) (name string, artist string, fileID string, metadata trackMetadata, err error) {
 	url := fmt.Sprintf("https://spclient.wg.spotify.com/metadata/4/track/%s", IDToHex(trackID))
 	resp, err := d.makeRequest(http.MethodGet, url, nil)
@@ -219,7 +181,6 @@ func (d *Downloader) getTrackMetadata(trackID string) (name string, artist strin
 	return metadata.Name, artist, fileID, metadata, nil
 }
 
-// getEpisodeMetadata 获取播客集数的元数据
 func (d *Downloader) getEpisodeMetadata(episodeID string) (name string, creator string, fileID string, err error) {
 	url := "https://api-partner.spotify.com/pathfinder/v1/query"
 	var paramsVar []byte
@@ -262,7 +223,6 @@ func (d *Downloader) getEpisodeMetadata(episodeID string) (name string, creator 
 	return episode.Name, episode.Creator, fileID, err
 }
 
-// requestCDNURL 请求 Spotify CDN 获取音频文件 URL
 func (d *Downloader) requestCDNURL(fileID string) (string, error) {
 	url := fmt.Sprintf("https://gew4-spclient.spotify.com/storage-resolve/files/audio/interactive/%s", fileID)
 	params := buildQueryParams(map[string]interface{}{"alt": "json"})
@@ -273,11 +233,9 @@ func (d *Downloader) requestCDNURL(fileID string) (string, error) {
 		return "", err
 	}
 
-	// 解析 JSON 响应为 cdnURL 结构体
 	var cdnResponse cdnURL
 	_ = json.Unmarshal(respBody, &cdnResponse)
 
-	// 检查并返回第一个 CDN URL
 	if len(cdnResponse.Cdnurl) == 0 {
 		return "", fmt.Errorf("no CDN URL found in response")
 	}

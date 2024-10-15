@@ -11,6 +11,8 @@ import (
 	"unsafe"
 )
 
+const PlayPlayToken = `015c8801577620d7d46de9d696bb9574`
+
 func PlayPlayDecrypt(keyBasis [16]byte, fileID [20]byte) [16]byte {
 	var buf [16]byte
 

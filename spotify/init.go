@@ -13,7 +13,6 @@ import (
 
 var cdmData []byte
 
-// readCDMs 读取 CDM 文件
 func readCDMs() []string {
 	cdms, err := filepath.Glob(filepath.Join("cdm", "*.wvd"))
 	if err != nil || len(cdms) == 0 {
@@ -26,7 +25,6 @@ func readCDMs() []string {
 	return cdms
 }
 
-// requestClientBases 获取 Spotify 下载 cdn 链接
 func requestClientBases() []string {
 	resp, err := http.Get("https://apresolve.spotify.com?type=spclient")
 	if err != nil {
@@ -41,7 +39,6 @@ func requestClientBases() []string {
 		return nil
 	}
 
-	// 定义 JSON 响应结构
 	var response struct {
 		SpClient []string `json:"spclient"`
 	}
@@ -51,7 +48,6 @@ func requestClientBases() []string {
 		return nil
 	}
 
-	// 使用 map 转换 endpoints
 	var formattedEndpoints []string
 	for _, endpoint := range response.SpClient {
 		formatted := formatEndpoint(endpoint)
@@ -63,7 +59,6 @@ func requestClientBases() []string {
 	return formattedEndpoints
 }
 
-// buildLicenseURL 构建许可证 URL
 func buildLicenseURL(clientBases []string) string {
 	if len(clientBases) == 0 {
 		log.Warn("No client bases available to build license URL")
@@ -72,7 +67,6 @@ func buildLicenseURL(clientBases []string) string {
 	return fmt.Sprintf("%s/widevine-license/v1/audio/license", clientBases[0])
 }
 
-// 格式化端点地址
 func formatEndpoint(endpoint string) string {
 	parts := strings.Split(endpoint, ":")
 	if len(parts) != 2 {

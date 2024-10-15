@@ -1,12 +1,10 @@
 package spotify
 
 import (
-	"bytes"
 	"fmt"
 	log "github.com/XiaoMengXinX/sp-dl-go/logger"
 	"github.com/XiaoMengXinX/sp-dl-go/playplay"
 	widevine "github.com/iyear/gowidevine"
-	"io"
 	"os"
 )
 
@@ -14,12 +12,12 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	var name, artist, fileID, format string
 	var metadata trackMetadata
 	switch {
-	case mp4FormatSet[d.Quality]:
+	case mp4FormatSet[d.quality]:
 		format = "mp3"
-	case oggFormatSet[d.Quality]:
+	case oggFormatSet[d.quality]:
 		format = "ogg"
 	default:
-		return fmt.Errorf("invalid quality: %s", d.Quality)
+		return fmt.Errorf("invalid quality: %s", d.quality)
 	}
 	switch content {
 	case TRACK:
@@ -45,24 +43,27 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	default:
 		return fmt.Errorf("invalid content type")
 	}
-	filename := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
-	outFile := fmt.Sprintf("%s/%s.%s", d.OutputFolder, filename, format)
+	fileName := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
+	tmpFileName := fmt.Sprintf("%s.%s.tmp", fileName, format)
+	tmpFilePath := fmt.Sprintf("%s/%s", d.OutputFolder, tmpFileName)
+	outFilePath := fmt.Sprintf("%s/%s.%s", d.OutputFolder, fileName, format)
 
-	log.Infof("Downloading %s [%s]", content, filename)
+	log.Infof("Downloading %s [%s]", content, fileName)
 
-	defer func(filename string, outFile string, err *error) {
+	defer func(filename string, filePath string, err *error) {
 		if *err != nil {
-			_ = os.Remove(outFile)
+			_ = os.Remove(filePath)
 			log.Errorf("Failed to download [%s]: %v", filename, (*err).Error())
 		}
-	}(filename, outFile, &err)
+	}(fileName, outFilePath, &err)
 
 	cdnURL, err := d.requestCDNURL(fileID)
 	if err != nil {
 		return err
 	}
 
-	err = downloadURL(cdnURL, d.OutputFolder, filename+"."+format)
+	err = d.downloadURL(cdnURL, tmpFileName)
+	defer os.Remove(tmpFilePath)
 	if err != nil {
 		return err
 	}
@@ -70,18 +71,17 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	//TODO: Download cover for track
 	_ = metadata
 
-	file, err := os.OpenFile(outFile, os.O_RDWR, 0644)
+	tmpFile, err := os.OpenFile(tmpFilePath, os.O_RDONLY, 0644)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer tmpFile.Close()
 
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, file)
+	outFile, err := os.Create(outFilePath) // 使用 os.Create 创建文件
 	if err != nil {
 		return err
 	}
-	decryptedBuf := new(bytes.Buffer)
+	defer outFile.Close()
 
 	switch format {
 	case "mp3":
@@ -97,7 +97,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		}
 		log.Debugf("Get decrypt key for [%s] successfully", ID)
 
-		err = widevine.DecryptMP4Auto(buf, keys, decryptedBuf)
+		err = widevine.DecryptMP4Auto(tmpFile, keys, outFile)
 		if err != nil {
 			return fmt.Errorf("failed to decrypt file: %v", err)
 		}
@@ -106,28 +106,15 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		if err != nil {
 			return fmt.Errorf("get decrypt key failed: %v", err)
 		}
-		err = playplay.DecryptFileStream(key[:], buf, decryptedBuf)
+		err = playplay.DecryptFileStream(key[:], tmpFile, outFile)
 		if err != nil {
 			return fmt.Errorf("failed to decrypt file: %v", err)
 		}
 	}
 
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		return err
-	}
-	err = file.Truncate(0)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(file, decryptedBuf)
-	if err != nil {
-		return err
-	}
-
 	//TODO: Add id3v2 for track
 
-	log.Infof("Download %s [%s] successfully", content, filename)
+	log.Infof("Download %s [%s] successfully", content, fileName)
 	return nil
 }
 
