@@ -14,7 +14,7 @@ func init() {
 
 func main() {
 	id := flag.String("id", "", "Spotify URL/ID (required). Example usage: -id https://open.spotify.com/track/4jTrKMoc44RYZsoFsIlQev")
-	quality := flag.String("quality", spotify.Quality128MP4Dual, "quality level. Options: MP4_128, MP4_128_DUAL, MP4_256, MP4_256_DUAL, OGG_VORBIS_320, OGG_VORBIS_160, OGG_VORBIS_96")
+	quality := flag.String("quality", spotify.Quality128MP4Dual, "Quality level. Options: MP4_128, MP4_128_DUAL, MP4_256, MP4_256_DUAL, OGG_VORBIS_320, OGG_VORBIS_160, OGG_VORBIS_96")
 	output := flag.String("output", "./output", "Output path.")
 	debug := flag.Bool("debug", false, "Print debug information. Use this to enable more detailed logging for troubleshooting.")
 	isConvertToMP3 := flag.Bool("mp3", false, "Convert downloaded music to mp3 format")
