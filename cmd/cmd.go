@@ -19,8 +19,14 @@ func main() {
 	debug := flag.Bool("debug", false, "Print debug information. Use this to enable more detailed logging for troubleshooting.")
 	isConvertToMP3 := flag.Bool("mp3", false, "Convert downloaded music to mp3 format")
 	isSkipAddingMetadata := flag.Bool("no-metadata", false, "Skip adding metadata to downloaded files.")
+	showHelp := flag.Bool("help", false, "Show this help message.")
 
 	flag.Parse()
+
+	if *showHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
 
 	if *id == "" {
 		fmt.Println("Error: -id is required")
