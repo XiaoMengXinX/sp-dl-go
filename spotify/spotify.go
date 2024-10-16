@@ -152,7 +152,7 @@ func (d *Downloader) fetchShowEpisodes(showID string, offset int, episodes []str
 }
 
 func (d *Downloader) getTrackMetadata(trackID string) (name string, artist string, fileID string, metadata trackMetadata, err error) {
-	url := fmt.Sprintf("https://spclient.wg.spotify.com/metadata/4/track/%s", IDToHex(trackID))
+	url := fmt.Sprintf("https://spclient.wg.spotify.com/metadata/4/track/%s", SpIDToHex(trackID))
 	resp, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Debugf("Fetch track metadata Failed: %v", err)
@@ -166,7 +166,9 @@ func (d *Downloader) getTrackMetadata(trackID string) (name string, artist strin
 	if len(metadata.Artists) != 0 {
 		artist = metadata.Artists[0].Name
 	}
+
 	log.Debugf("Available formats: %+v", getAllFiles(metadata))
+
 	fileID, err = d.selectFromQuality(getAllFiles(metadata))
 	if err != nil {
 		return "", "", "", metadata, err

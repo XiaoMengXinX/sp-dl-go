@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	log "github.com/XiaoMengXinX/sp-dl-go/logger"
+	"math/big"
 	"net/url"
 	"os"
 	"regexp"
@@ -32,54 +33,43 @@ func buildQueryParams(params map[string]interface{}) string {
 	return values.Encode()
 }
 
-func IDToHex(spotifyID string) string {
-	if len(spotifyID) != 22 {
+func SpIDToHex(spotifyID string) string {
+	base62Charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	dictionary := make(map[byte]int64, len(base62Charset))
+	for i := 0; i < len(base62Charset); i++ {
+		dictionary[base62Charset[i]] = int64(i)
+	}
+
+	base := big.NewInt(62)
+	result := big.NewInt(0)
+	for i := 0; i < len(spotifyID); i++ {
+		value := big.NewInt(dictionary[spotifyID[i]])
+		result.Mul(result, base).Add(result, value)
+	}
+	return fmt.Sprintf("%032s", hex.EncodeToString(result.Bytes()))
+}
+
+func SpHexToID(hexStr string) string {
+	base62Charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	hexBytes, err := hex.DecodeString(hexStr)
+	if err != nil {
 		return ""
 	}
-
-	idBytes := []byte(spotifyID)
-	alphabet := []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	dictionary := make([]byte, 256)
-	for i := 0; i < 62; i++ {
-		dictionary[alphabet[i]] = byte(i & 0xff)
+	num := new(big.Int).SetBytes(hexBytes)
+	if num.Cmp(big.NewInt(0)) == 0 {
+		return string(base62Charset[0])
 	}
 
-	big := make([]byte, 22)
-	for i := 0; i < 22; i++ {
-		big[i] = dictionary[idBytes[i]]
+	base := big.NewInt(62)
+	result := ""
+	for num.Cmp(big.NewInt(0)) > 0 {
+		remainder := new(big.Int)
+		num.DivMod(num, base, remainder)
+		result = string(base62Charset[remainder.Int64()]) + result
 	}
-
-	var out []byte
-	for len(big) > 0 {
-		var quotient []byte
-		remainder := 0
-
-		for _, b := range big {
-			accumulator := int(b) + remainder*62
-			digit := (accumulator - (accumulator % 256)) / 256
-			remainder = accumulator % 256
-
-			if len(quotient) > 0 || digit > 0 {
-				quotient = append(quotient, byte(digit))
-			}
-		}
-
-		out = append(out, byte(remainder))
-		big = quotient
-	}
-
-	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
-		out[i], out[j] = out[j], out[i]
-	}
-
-	hexString := hex.EncodeToString(out)
-
-	if len(hexString) < 32 {
-		hexString = fmt.Sprintf("%032s", hexString)
-	}
-
-	return hexString
+	return fmt.Sprintf("%022s", result)
 }
 
 func getAllFiles(metadata trackMetadata) []fileEntry {

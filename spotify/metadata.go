@@ -9,7 +9,9 @@ import (
 )
 
 func (d *Downloader) AddMetadata(trackMD trackMetadata, filePath string) (err error) {
-	trackID, _, _ := getIDType(trackMD.URI)
+	trackID := SpHexToID(trackMD.GID)
+	log.Debugf("trackID: %s", trackMD.GID)
+	log.Debugf("ID: %s", SpHexToID(trackMD.GID))
 
 	track, err := d.getTrackAPI(trackID)
 	if err != nil {
@@ -29,7 +31,7 @@ func (d *Downloader) AddMetadata(trackMD trackMetadata, filePath string) (err er
 	metadata["album_artist"] = formatArtistsStr(album.Artists)
 	for _, copyright := range album.Copyrights {
 		if copyright.Type == "P" {
-			metadata["copyright"] = copyright.Text
+			metadata["copyright"] = fmt.Sprintf("℗ %s", copyright.Text)
 			break
 		}
 	}
@@ -46,7 +48,7 @@ func (d *Downloader) AddMetadata(trackMD trackMetadata, filePath string) (err er
 	if album.ExternalIds.EAN != "" {
 		metadata["EAN"] = album.ExternalIds.EAN
 	}
-	metadata["track"] = fmt.Sprintf("%d/%d", track.DiscNumber, track.Album.TotalTracks)
+	metadata["track"] = fmt.Sprintf("%d/%d", track.TrackNumber, track.Album.TotalTracks)
 	if len(album.Genres) > 0 {
 		metadata["genre"] = album.Genres[0]
 	}

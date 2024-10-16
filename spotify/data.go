@@ -60,7 +60,6 @@ type trackData struct {
 		Artists              []artistDataBasic `json:"artists"`
 	} `json:"album"`
 	Artists     []artistDataBasic `json:"artists"`
-	DiscNumber  int               `json:"disc_number"`
 	DurationMs  int               `json:"duration_ms"`
 	ExternalIDs struct {
 		ISRC string `json:"isrc"`
@@ -72,6 +71,7 @@ type trackData struct {
 }
 
 type trackMetadata struct {
+	GID   string `json:"gid"`
 	Name  string `json:"name"`
 	Album struct {
 		Name       string `json:"name"`
@@ -89,7 +89,7 @@ type trackMetadata struct {
 	AltFile []struct {
 		File []fileEntry `json:"file"`
 	} `json:"alternative,omitempty"`
-	URI string `json:"canonical_uri"`
+	CanonicalURI string `json:"canonical_uri"`
 }
 
 type episodeMetadata struct {
