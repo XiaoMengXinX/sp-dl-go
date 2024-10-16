@@ -6,6 +6,7 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 var hasFFmpeg bool
@@ -15,6 +16,51 @@ func init() {
 	if err == nil {
 		hasFFmpeg = true
 	}
+}
+
+func encodeMetadata(inputFile, coverFilePath string, metadata map[string]string) error {
+	tempFile := inputFile + ".tmp" + filepath.Ext(inputFile)
+
+	var mdArg []string
+	for key, value := range metadata {
+		if value != "" {
+			mdArg = append(mdArg, fmt.Sprintf("%s=%s", key, value))
+		}
+	}
+
+	input := []*ffmpeg.Stream{ffmpeg.Input(inputFile)}
+	args := ffmpeg.KwArgs{
+		"c":        "copy",
+		"metadata": mdArg,
+	}
+
+	if coverFilePath != "" {
+		if _, err := os.Stat(coverFilePath); !os.IsNotExist(err) {
+			input = append(input, []*ffmpeg.Stream{ffmpeg.Input(coverFilePath)}...)
+			args["disposition:v:0"] = "attached_pic"
+		}
+	}
+
+	ff := ffmpeg.Output(input, tempFile, args).
+		OverWriteOutput().Silent(true)
+
+	if log.GetLevel() == log.LevelDebug {
+		ff.Silent(false).WithErrorOutput(os.Stderr)
+	}
+
+	err := ff.Run()
+	if err != nil {
+		return fmt.Errorf("failed to encode metadata: %v", err)
+	}
+
+	if err := os.Remove(inputFile); err != nil {
+		return fmt.Errorf("failed to remove temp file: %v", err)
+	}
+
+	if err := os.Rename(tempFile, inputFile); err != nil {
+		return fmt.Errorf("fail to rename temp file: %v", err)
+	}
+	return nil
 }
 
 func (d *Downloader) convertMp3(inputFile string, outputFile string) (err error) {

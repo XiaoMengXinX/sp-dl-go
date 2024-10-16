@@ -1,32 +1,74 @@
 package spotify
 
-type albumData struct {
+type albumTracksData struct {
 	Items []struct {
-		Id string `json:"id"` // 音轨 ID
+		Id string `json:"id"`
 	} `json:"items"`
-	Total  int    `json:"total"`  // 总音轨数
-	Offset int    `json:"offset"` // 当前偏移量
-	Next   string `json:"next"`   // 下一页链接
+	Total  int    `json:"total"`
+	Offset int    `json:"offset"`
+	Next   string `json:"next"`
 }
 
-type playlistData struct {
+type playlistTracksData struct {
 	Items []struct {
 		Track struct {
-			Id string `json:"id"` // 音轨 ID
+			Id string `json:"id"`
 		} `json:"track"`
 	} `json:"items"`
-	Total  int    `json:"total"`  // 总音轨数
-	Offset int    `json:"offset"` // 当前偏移量
-	Next   string `json:"next"`   // 下一页链接
+	Total  int    `json:"total"`
+	Offset int    `json:"offset"`
+	Next   string `json:"next"`
 }
 
-type showData struct {
+type showTracksData struct {
 	Items []struct {
-		Id string `json:"id"` // 集数 ID
+		Id string `json:"id"`
 	} `json:"items"`
-	Total  int    `json:"total"`  // 总集数
-	Offset int    `json:"offset"` // 当前偏移量
-	Next   string `json:"next"`   // 下一页链接
+	Total  int    `json:"total"`
+	Offset int    `json:"offset"`
+	Next   string `json:"next"`
+}
+
+type albumData struct {
+	Type                 string            `json:"album_type"`
+	TotalTracks          int               `json:"total_tracks"`
+	Name                 string            `json:"name"`
+	ReleaseDate          string            `json:"release_date"`
+	ReleaseDatePrecision string            `json:"release_date_precision"`
+	Artists              []artistDataBasic `json:"artists"`
+	Copyrights           []struct {
+		Text string `json:"text"`
+		Type string `json:"type"`
+	} `json:"copyrights"`
+	ExternalIds struct {
+		ISRC string `json:"isrc"`
+		EAN  string `json:"ean"`
+		UPC  string `json:"upc"`
+	} `json:"external_ids"`
+	Genres []string `json:"genres"`
+	Label  string   `json:"label"`
+}
+
+type trackData struct {
+	Album struct {
+		Type                 string            `json:"album_type"`
+		TotalTracks          int               `json:"total_tracks"`
+		ID                   string            `json:"id"`
+		Name                 string            `json:"name"`
+		ReleaseDate          string            `json:"release_date"`
+		ReleaseDatePrecision string            `json:"release_date_precision"`
+		Artists              []artistDataBasic `json:"artists"`
+	} `json:"album"`
+	Artists     []artistDataBasic `json:"artists"`
+	DiscNumber  int               `json:"disc_number"`
+	DurationMs  int               `json:"duration_ms"`
+	ExternalIDs struct {
+		ISRC string `json:"isrc"`
+		EAN  string `json:"ean"`
+		UPC  string `json:"upc"`
+	} `json:"external_ids"`
+	Name        string `json:"name"`
+	TrackNumber int    `json:"track_number"`
 }
 
 type trackMetadata struct {
@@ -42,13 +84,12 @@ type trackMetadata struct {
 			} `json:"image"`
 		} `json:"cover_group"`
 	} `json:"album"`
-	Artist []struct {
-		Name string `json:"name"`
-	} `json:"artist"`
-	File    []fileEntry `json:"file"`
+	Artists []artistDataBasic `json:"artist"`
+	File    []fileEntry       `json:"file"`
 	AltFile []struct {
 		File []fileEntry `json:"file"`
 	} `json:"alternative,omitempty"`
+	URI string `json:"canonical_uri"`
 }
 
 type episodeMetadata struct {
@@ -68,9 +109,14 @@ type episodeMetadata struct {
 	} `json:"data"`
 }
 
+type artistDataBasic struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+
 type cdnURL struct {
 	Result string   `json:"result"`
-	Cdnurl []string `json:"cdnurl"`
+	CdnURL []string `json:"cdnurl"`
 	Fileid string   `json:"fileid"`
 	Ttl    int      `json:"ttl"`
 }

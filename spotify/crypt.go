@@ -61,7 +61,7 @@ func (d *Downloader) getMp4Keys(psshStr string) ([]*widevine.Key, error) {
 		return nil, fmt.Errorf("get license challenge failed: %w", err)
 	}
 
-	license, err := d.makeRequest("POST", d.licenseURL, challenge)
+	license, err := d.makeRequest(http.MethodPost, d.licenseURL, challenge)
 
 	if err != nil {
 		return nil, fmt.Errorf("request license failed: %w", err)
@@ -93,7 +93,7 @@ func (d *Downloader) getOggKeys(fileID string) (key [16]byte, err error) {
 	}
 
 	url := fmt.Sprintf("https://spclient.wg.spotify.com/playplay/v1/key/%s", fileID)
-	resp, err := d.makeRequest("POST", url, body)
+	resp, err := d.makeRequest(http.MethodPost, url, body)
 	if err != nil {
 		return key, fmt.Errorf("request license failed: %w", err)
 	}

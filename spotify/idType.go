@@ -1,7 +1,7 @@
 package spotify
 
 import (
-	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -24,24 +24,24 @@ func getIDType(urlID string) (string, IDType, error) {
 		}
 
 		if parsedURL.Host != "open.spotify.com" {
-			return "", "", errors.New("invalid domain")
+			return "", "", fmt.Errorf("invalid domain: %s", urlID)
 		}
 
 		pathSegments := strings.Split(parsedURL.Path, "/")
 		if len(pathSegments) < 3 {
-			return "", "", errors.New("invalid URL path")
+			return "", "", fmt.Errorf("invalid URL path: %s", parsedURL.Path)
 		}
 
 		return pathSegments[2], IDType(pathSegments[1]), nil
 	} else if strings.HasPrefix(urlID, "spotify:") {
 		split := strings.Split(urlID, ":")
 		if len(split) < 3 {
-			return "", "", errors.New("invalid URI format")
+			return "", "", fmt.Errorf("invalid URI format: %s", urlID)
 		}
 		return split[2], IDType(split[1]), nil
 	}
 	if urlID == "" {
-		return "", "", errors.New("invalid URL or ID")
+		return "", "", fmt.Errorf("invalid URL or ID: %s", urlID)
 	}
 	return urlID, TRACK, nil
 }

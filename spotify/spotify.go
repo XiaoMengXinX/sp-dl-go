@@ -42,8 +42,8 @@ type Downloader struct {
 	clientBases   []string
 	licenseURL    string
 
-	skipFormatConvertion bool
-	skipAddingMetadata   bool
+	isConvertToMP3     bool
+	skipAddingMetadata bool
 }
 
 func NewDownloader() *Downloader {
@@ -73,11 +73,8 @@ func (d *Downloader) SetQuality(quality string) error {
 	return nil
 }
 
-func (d *Downloader) SkipFormatConvertion(b bool) *Downloader {
-	d.skipFormatConvertion = b
-	if d.skipFormatConvertion {
-		d.skipAddingMetadata = true
-	}
+func (d *Downloader) ConvertToMP3(b bool) *Downloader {
+	d.isConvertToMP3 = b
 	return d
 }
 
@@ -105,16 +102,9 @@ func (d *Downloader) GetTracks(url string) ([]string, error) {
 }
 
 func (d *Downloader) fetchAlbumTracks(albumID string, offset int, tracks []string) ([]string, error) {
-	url := fmt.Sprintf("https://api.spotify.com/v1/albums/%s/tracks?offset=%d&limit=50", albumID, offset)
-	data, err := d.makeRequest(http.MethodGet, url, nil)
+	albumData, err := d.getAlbumTracksAPI(albumID, offset)
 	if err != nil {
-		log.Debugf("Fetch Album tracks Failed: %v", err)
 		return nil, err
-	}
-
-	var albumData albumData
-	if err := json.Unmarshal(data, &albumData); err != nil {
-		return nil, fmt.Errorf("failed to decode album data: %w", err)
 	}
 
 	for _, item := range albumData.Items {
@@ -128,16 +118,9 @@ func (d *Downloader) fetchAlbumTracks(albumID string, offset int, tracks []strin
 }
 
 func (d *Downloader) fetchPlaylistTracks(playlistID string, offset int, tracks []string) ([]string, error) {
-	url := fmt.Sprintf("https://api.spotify.com/v1/playlists/%s/tracks?offset=%d&limit=100", playlistID, offset)
-	data, err := d.makeRequest(http.MethodGet, url, nil)
+	playlistData, err := d.getPlaylistTracksAPI(playlistID, offset)
 	if err != nil {
-		log.Debugf("Fetch Playlist tracks Failed: %v", err)
 		return nil, err
-	}
-
-	var playlistData playlistData
-	if err := json.Unmarshal(data, &playlistData); err != nil {
-		return nil, fmt.Errorf("failed to decode playlist data: %w", err)
 	}
 
 	for _, item := range playlistData.Items {
@@ -153,16 +136,9 @@ func (d *Downloader) fetchPlaylistTracks(playlistID string, offset int, tracks [
 }
 
 func (d *Downloader) fetchShowEpisodes(showID string, offset int, episodes []string) ([]string, error) {
-	url := fmt.Sprintf("https://api.spotify.com/v1/shows/%s/episodes?offset=%d&limit=50", showID, offset)
-	data, err := d.makeRequest(http.MethodGet, url, nil)
+	showData, err := d.getShowTracksAPI(showID, offset)
 	if err != nil {
-		log.Debugf("Fetch Show episodes Failed: %v", err)
 		return nil, err
-	}
-
-	var showData showData
-	if err := json.Unmarshal(data, &showData); err != nil {
-		return nil, fmt.Errorf("failed to decode show data: %w", err)
 	}
 
 	for _, item := range showData.Items {
@@ -187,8 +163,8 @@ func (d *Downloader) getTrackMetadata(trackID string) (name string, artist strin
 		return "", "", "", metadata, fmt.Errorf("failed to decode track metadata: %w", err)
 	}
 
-	if len(metadata.Artist) != 0 {
-		artist = metadata.Artist[0].Name
+	if len(metadata.Artists) != 0 {
+		artist = metadata.Artists[0].Name
 	}
 	log.Debugf("Available formats: %+v", getAllFiles(metadata))
 	fileID, err = d.selectFromQuality(getAllFiles(metadata))
@@ -199,7 +175,7 @@ func (d *Downloader) getTrackMetadata(trackID string) (name string, artist strin
 	return metadata.Name, artist, fileID, metadata, nil
 }
 
-func (d *Downloader) getEpisodeMetadata(episodeID string) (name string, creator string, fileID string, err error) {
+func (d *Downloader) getEpisodeMetadata(episodeID string) (name string, creator string, fileID string, metadata episodeMetadata, err error) {
 	url := "https://api-partner.spotify.com/pathfinder/v1/query"
 	var paramsVar []byte
 	paramsVar, _ = json.Marshal(map[string]string{
@@ -220,32 +196,31 @@ func (d *Downloader) getEpisodeMetadata(episodeID string) (name string, creator 
 	resp, err := d.makeRequest(http.MethodGet, url+"?"+buildQueryParams(params), nil)
 	if err != nil {
 		log.Debugf("Fetch episode metadata Failed: %v", err)
-		return "", "", "", err
+		return "", "", "", metadata, err
 	}
 
-	var metadata episodeMetadata
 	if err := json.Unmarshal(resp, &metadata); err != nil {
-		return "", "", "", fmt.Errorf("failed to decode episode metadata: %w", err)
+		return "", "", "", metadata, fmt.Errorf("failed to decode episode metadata: %w", err)
 	}
 
 	episode := metadata.Data.Episode
 	fileID, err = d.selectFromQuality(episode.Audio.Items)
 	if err != nil {
-		return "", "", "", err
+		return "", "", "", metadata, err
 	}
 
 	if episode.Creator == "" {
 		episode.Creator = episode.Podcast.Data.Name
 	}
 
-	return episode.Name, episode.Creator, fileID, err
+	return episode.Name, episode.Creator, fileID, metadata, err
 }
 
 func (d *Downloader) requestCDNURL(fileID string) (string, error) {
 	url := fmt.Sprintf("https://gew4-spclient.spotify.com/storage-resolve/files/audio/interactive/%s", fileID)
 	params := buildQueryParams(map[string]interface{}{"alt": "json"})
 
-	respBody, err := d.makeRequest("GET", url+"?"+params, nil)
+	respBody, err := d.makeRequest(http.MethodGet, url+"?"+params, nil)
 	if err != nil {
 		log.Debugf("Fetch CDN URL Failed: %v", err)
 		return "", err
@@ -254,10 +229,10 @@ func (d *Downloader) requestCDNURL(fileID string) (string, error) {
 	var cdnResponse cdnURL
 	_ = json.Unmarshal(respBody, &cdnResponse)
 
-	if len(cdnResponse.Cdnurl) == 0 {
+	if len(cdnResponse.CdnURL) == 0 {
 		return "", fmt.Errorf("no CDN URL found in response")
 	}
-	log.Debugf("Get CDN URL successfully: %v", cdnResponse.Cdnurl)
+	log.Debugf("Get CDN URL successfully: %v", cdnResponse.CdnURL)
 
-	return cdnResponse.Cdnurl[0], nil
+	return cdnResponse.CdnURL[0], nil
 }

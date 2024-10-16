@@ -25,7 +25,6 @@ func buildQueryParams(params map[string]interface{}) string {
 		case bool:
 			values.Add(key, strconv.FormatBool(v))
 		default:
-			// 如果是其他类型，将其转换为字符串
 			values.Add(key, fmt.Sprintf("%v", v))
 		}
 	}
@@ -74,7 +73,13 @@ func IDToHex(spotifyID string) string {
 		out[i], out[j] = out[j], out[i]
 	}
 
-	return hex.EncodeToString(out)
+	hexString := hex.EncodeToString(out)
+
+	if len(hexString) < 32 {
+		hexString = fmt.Sprintf("%032s", hexString)
+	}
+
+	return hexString
 }
 
 func getAllFiles(metadata trackMetadata) []fileEntry {
@@ -97,16 +102,17 @@ func checkDirExist(dirPath string) error {
 	return nil
 }
 
-func formatArtistsStr(metadata trackMetadata) string {
-	var artists string
-	for i, ar := range metadata.Artist {
-		if i == 0 {
-			artists = ar.Name
-		} else {
-			artists = fmt.Sprintf("%s, %s", artists, ar.Name)
-		}
+func formatArtistsStr(artists []artistDataBasic) string {
+	if len(artists) == 0 {
+		return ""
 	}
-	return artists
+
+	artistNames := make([]string, len(artists))
+	for i, ar := range artists {
+		artistNames[i] = ar.Name
+	}
+
+	return strings.Join(artistNames, ", ")
 }
 
 func cleanFilename(filename string) string {
@@ -114,7 +120,7 @@ func cleanFilename(filename string) string {
 
 	var illegalChars *regexp.Regexp
 	switch osType {
-	case "darwin": // Mac
+	case "darwin":
 		illegalChars = regexp.MustCompile(`[:\x00-\x1F]`)
 	case "linux":
 		illegalChars = regexp.MustCompile(`[\x00/]`)

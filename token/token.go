@@ -19,7 +19,6 @@ type Manager struct {
 	ConfigManager     *config.Manager
 }
 
-// NewTokenManager 创建 Manager 实例并初始化
 func NewTokenManager() *Manager {
 	log.Debugln("Initializing Token Manager")
 	return &Manager{
@@ -28,7 +27,6 @@ func NewTokenManager() *Manager {
 	}
 }
 
-// QuerySpDc 检查 sp_dc, 并获取 Access Token
 func (tm *Manager) QuerySpDc() {
 	log.Debugln("Querying sp_dc cookie")
 	conf, err := tm.ConfigManager.ReadAndGet()
@@ -50,7 +48,6 @@ func (tm *Manager) QuerySpDc() {
 	tm.AccessToken, tm.AccessTokenExpire = tm.GetAccessToken()
 }
 
-// _requestAccessToken 请求访问令牌
 func (tm *Manager) _requestAccessToken(spDc string) (string, int64, error) {
 	log.Debugln("Requesting access token from Spotify")
 	client := &http.Client{}
@@ -104,7 +101,6 @@ func (tm *Manager) _requestAccessToken(spDc string) (string, int64, error) {
 	return accessToken, expireTimestamp, nil
 }
 
-// GetAccessToken 获取有效的访问令牌
 func (tm *Manager) GetAccessToken() (string, int64) {
 	log.Debugln("Checking access token")
 

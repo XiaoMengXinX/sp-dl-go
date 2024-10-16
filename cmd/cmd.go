@@ -17,8 +17,7 @@ func main() {
 	quality := flag.String("quality", spotify.Quality128MP4Dual, "quality level. Options: MP4_128, MP4_128_DUAL, MP4_256, MP4_256_DUAL, OGG_VORBIS_320, OGG_VORBIS_160, OGG_VORBIS_96")
 	output := flag.String("output", "./output", "Output path.")
 	debug := flag.Bool("debug", false, "Print debug information. Use this to enable more detailed logging for troubleshooting.")
-	isSkipFormatConvertion := flag.Bool("no-convert-format", false,
-		"Disable converting downloaded files to mp3. Notice: Disabling format conversion will also skip adding metadata to files")
+	isConvertToMP3 := flag.Bool("mp3", false, "Convert downloaded music to mp3 format")
 	isSkipAddingMetadata := flag.Bool("no-metadata", false, "Skip adding metadata to downloaded files.")
 
 	flag.Parse()
@@ -43,11 +42,9 @@ func main() {
 	}
 	log.Infof("Set quality level: %s", *quality)
 
-	if *isSkipFormatConvertion {
-		sp.SkipFormatConvertion(*isSkipFormatConvertion)
-		log.Infoln("Downloaded music will not be converted to mp3")
-		*isSkipAddingMetadata = true
-		log.Infof("")
+	if *isConvertToMP3 {
+		sp.ConvertToMP3(*isConvertToMP3)
+		log.Infoln("Downloaded music will be converted to mp3")
 	}
 
 	if *isSkipAddingMetadata {

@@ -18,17 +18,17 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		if err != nil {
 			defer func(ID string, err *error) {
 				if *err != nil {
-					log.Errorf("Failed to get metadata of trackID [%s]: %v", ID, (*err).Error())
+					log.Errorln((*err).Error())
 				}
 			}(ID, &err)
 			return fmt.Errorf("failed to get metadata of trackID [%s]: %v", ID, err)
 		}
 	case EPISODE:
-		name, artist, fileID, err = d.getEpisodeMetadata(ID)
+		name, artist, fileID, _, err = d.getEpisodeMetadata(ID)
 		if err != nil {
 			defer func(ID string, err *error) {
 				if *err != nil {
-					log.Errorf("Failed to get metadata of episodeID [%s]: %v", ID, (*err).Error())
+					log.Errorln((*err).Error())
 				}
 			}(ID, &err)
 			return fmt.Errorf("failed to get metadata of episodeID [%s]: %v", ID, err)
@@ -46,7 +46,6 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 
 	fileName := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
 	outFilePath := fmt.Sprintf("%s/%s.%s", d.OutputFolder, fileName, format)
-	mp3FilePath := fmt.Sprintf("%s/%s.mp3", d.OutputFolder, fileName)
 
 	log.Infof("Downloading %s [%s]", content, fileName)
 
@@ -62,18 +61,30 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	}(fileName, &err)
 
 	if hasFFmpeg {
-		err = d.convertMp3(outFilePath, mp3FilePath)
-		if err != nil {
-			return err
-		}
-		_ = os.Remove(outFilePath)
+		if d.isConvertToMP3 {
+			mp3FilePath := fmt.Sprintf("%s/%s.mp3", d.OutputFolder, fileName)
+			err = d.convertMp3(outFilePath, mp3FilePath)
+			if err != nil {
+				return err
+			}
+			_ = os.Remove(outFilePath)
 
-		err = d.AddMetadata(metadata, mp3FilePath)
-		if err != nil {
-			return err
+			outFilePath = mp3FilePath
+		}
+
+		if !d.skipAddingMetadata && (d.isConvertToMP3 || format == "m4a") && content == TRACK {
+			err = d.AddMetadata(metadata, outFilePath)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
-		log.Warnln("ffmpeg not found, skip adding metadata")
+		if d.isConvertToMP3 {
+			log.Warnln("ffmpeg not found, skip converting to mp3")
+		}
+		if !d.skipAddingMetadata {
+			log.Warnln("ffmpeg not found, skip adding metadata")
+		}
 	}
 
 	log.Infof("Download %s [%s] successfully", content, fileName)
