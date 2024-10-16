@@ -36,7 +36,7 @@ func getIDType(urlID string) (string, IDType, error) {
 	} else if strings.HasPrefix(urlID, "spotify:") {
 		split := strings.Split(urlID, ":")
 		if len(split) < 3 {
-			return "", "", fmt.Errorf("invalid CanonicalURI format: %s", urlID)
+			return "", "", fmt.Errorf("invalid URI format: %s", urlID)
 		}
 		return split[2], IDType(split[1]), nil
 	}
