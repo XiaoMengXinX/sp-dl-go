@@ -42,8 +42,8 @@ type Downloader struct {
 	clientBases   []string
 	licenseURL    string
 
-	isConvertToMP3     bool
-	skipAddingMetadata bool
+	isConvertToMP3       bool
+	isSkipAddingMetadata bool
 }
 
 func NewDownloader() *Downloader {
@@ -55,6 +55,7 @@ func NewDownloader() *Downloader {
 }
 
 func (d *Downloader) Initialize() *Downloader {
+	d.TokenManager.ConfigManager.Initialize()
 	d.TokenManager.QuerySpDc()
 	d.clientBases = requestClientBases()
 	d.licenseURL = buildLicenseURL(d.clientBases)
@@ -79,7 +80,7 @@ func (d *Downloader) ConvertToMP3(b bool) *Downloader {
 }
 
 func (d *Downloader) SkipAddingMetadata(b bool) *Downloader {
-	d.skipAddingMetadata = b
+	d.isSkipAddingMetadata = b
 	return d
 }
 

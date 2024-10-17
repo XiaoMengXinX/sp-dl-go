@@ -8,11 +8,8 @@ import (
 	"os"
 )
 
-func init() {
-	log.Init(log.LevelInfo)
-}
-
 func main() {
+	config := flag.String("c", "config.json", "Path to config file")
 	id := flag.String("id", "", "Spotify URL/URI/ID (required). Example usage: -id https://open.spotify.com/track/4jTrKMoc44RYZsoFsIlQev")
 	quality := flag.String("quality", spotify.Quality128MP4Dual, "Quality level. Options: MP4_128, MP4_128_DUAL, MP4_256, MP4_256_DUAL, OGG_VORBIS_320, OGG_VORBIS_160, OGG_VORBIS_96")
 	output := flag.String("output", "./output", "Output path.")
@@ -35,10 +32,13 @@ func main() {
 	}
 
 	if *debug {
-		log.Init(log.LevelDebug)
+		log.SetLevel(log.LevelDebug)
 	}
 
 	sp := spotify.NewDownloader()
+
+	sp.TokenManager.ConfigManager.SetConfigPath(*config)
+	log.Infof("Set Config Path: %s", *config)
 
 	sp.OutputFolder = *output
 	log.Infof("Set Output path: %s", *output)

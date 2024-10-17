@@ -72,7 +72,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 			outFilePath = mp3FilePath
 		}
 
-		if !d.skipAddingMetadata && (d.isConvertToMP3 || format == "m4a") && content == TRACK {
+		if !d.isSkipAddingMetadata && (d.isConvertToMP3 || format == "m4a") && content == TRACK {
 			err = d.AddMetadata(metadata, outFilePath)
 			if err != nil {
 				return err
@@ -82,7 +82,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		if d.isConvertToMP3 {
 			log.Warnln("ffmpeg not found, skip converting to mp3")
 		}
-		if !d.skipAddingMetadata {
+		if !d.isSkipAddingMetadata {
 			log.Warnln("ffmpeg not found, skip adding metadata")
 		}
 	}

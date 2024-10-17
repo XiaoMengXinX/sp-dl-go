@@ -8,12 +8,6 @@ import (
 	"os"
 )
 
-var CM = NewConfigManager()
-
-func init() {
-	CM.Initialize()
-}
-
 type Data struct {
 	SpDc              string   `json:"sp_dc"`
 	AccessToken       string   `json:"accessToken"`
@@ -22,33 +16,44 @@ type Data struct {
 }
 
 type Manager struct {
-	configFileName string
-	config         Data
-	defaults       Data
+	configPath string
+	config     Data
+	defaults   Data
 }
 
 func NewConfigManager() *Manager {
+	log.Debugln("New Config Manager Created")
 	defaults := Data{
 		SpDc:              "",
 		AccessToken:       "",
 		AccessTokenExpire: -1,
-		AcceptLanguage:    nil,
+		AcceptLanguage:    []string{},
 	}
 	return &Manager{
-		configFileName: "config.json",
-		config:         defaults,
-		defaults:       defaults,
+		configPath: "config.json",
+		config:     defaults,
+		defaults:   defaults,
 	}
 }
 
-func (cm *Manager) Initialize() {
-	if _, err := os.Stat(cm.configFileName); errors.Is(err, os.ErrNotExist) {
+func (cm *Manager) Initialize() *Manager {
+	log.Debugf("Initializing Config Manager, config path: %s", cm.configPath)
+	if _, err := os.Stat(cm.configPath); errors.Is(err, os.ErrNotExist) {
+		log.Debugf("Config file not found, trying to create one")
 		cm.writeConfig()
 	}
+	return cm
+}
+
+func (cm *Manager) SetConfigPath(path string) *Manager {
+	log.Debugf("Set config path to: %s", path)
+	cm.configPath = path
+	return cm
 }
 
 func (cm *Manager) ReadConfig() error {
-	data, err := os.ReadFile(cm.configFileName)
+	log.Debugf("Reading config file: %s", cm.configPath)
+	data, err := os.ReadFile(cm.configPath)
 	if err != nil {
 		return fmt.Errorf("unable to read config file: %w", err)
 	}
@@ -75,12 +80,13 @@ func (cm *Manager) GetDefault() Data {
 }
 
 func (cm *Manager) writeConfig() {
+	log.Debugf("Writing config file to: %s", cm.configPath)
 	data, err := json.MarshalIndent(cm.config, "", "  ")
 	if err != nil {
 		log.Fatalf("Unable to marshal config to json: %v", err)
 	}
 
-	if err := os.WriteFile(cm.configFileName, data, 0644); err != nil {
+	if err := os.WriteFile(cm.configPath, data, 0644); err != nil {
 		log.Fatalf("Unable to write config to file: %v", err)
 	}
 }

@@ -10,6 +10,13 @@ import (
 	"time"
 )
 
+func init() {
+	currentLevel = LevelInfo
+	handler = NewTextHandler(slog.Level(currentLevel))
+	logger = slog.New(handler)
+}
+
+var handler *TextHandler
 var logger *slog.Logger
 var currentLevel Level
 
@@ -86,10 +93,8 @@ func (h *TextHandler) WithGroup(name string) slog.Handler {
 	return h
 }
 
-func Init(level Level) {
-	currentLevel = level
-	handler := NewTextHandler(slog.Level(level))
-	logger = slog.New(handler)
+func SetLevel(level Level) {
+	handler.level = slog.Level(level)
 }
 
 func GetLevel() Level {

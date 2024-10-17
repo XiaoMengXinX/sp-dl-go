@@ -20,10 +20,10 @@ type Manager struct {
 }
 
 func NewTokenManager() *Manager {
-	log.Debugln("Initializing Token Manager")
+	log.Debugln("New Token Manager Created")
 	return &Manager{
 		TokenURL:      "https://open.spotify.com/get_access_token",
-		ConfigManager: config.CM,
+		ConfigManager: config.NewConfigManager(),
 	}
 }
 
@@ -34,9 +34,12 @@ func (tm *Manager) QuerySpDc() {
 		log.Warnf("Failed to read config: %v", err)
 	}
 	if conf.SpDc == "" {
-		log.Warnln("sp_dc cookie not found, prompting user input")
-		fmt.Print("sp_dc: ")
-		_, _ = fmt.Scanln(&tm.SpDc)
+		if tm.SpDc == "" {
+			log.Warnln("sp_dc cookie not found, prompting user input")
+			fmt.Print("sp_dc: ")
+			_, _ = fmt.Scanln(&tm.SpDc)
+			conf.SpDc = tm.SpDc
+		}
 		conf.SpDc = tm.SpDc
 		tm.ConfigManager.Set(conf)
 		log.Debugln("sp_dc cookie saved to config")
