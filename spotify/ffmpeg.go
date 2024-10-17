@@ -91,13 +91,19 @@ func (d *Downloader) convertMp3(inputFile string, outputFile string) (err error)
 	}
 	log.Debugf("Set convertor bitrate: %sk", bitrate)
 
-	err = ffmpeg.Input(inputFile).
+	ff := ffmpeg.Input(inputFile).
 		Output(outputFile, ffmpeg.KwArgs{
 			"format":        "mp3",
 			"audio_bitrate": bitrate + "k",
-			//"acodec": "libmp3lame",
+			// "acodec": 	"libmp3lame",
 		}).
-		OverWriteOutput().Silent(true).Run()
+		OverWriteOutput().Silent(true)
+
+	if log.GetLevel() == log.LevelDebug {
+		ff.Silent(false).WithErrorOutput(os.Stderr)
+	}
+
+	err = ff.Run()
 	if err != nil {
 		return fmt.Errorf("error while converting to mp3: %v", err)
 	}

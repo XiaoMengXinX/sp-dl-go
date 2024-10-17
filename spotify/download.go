@@ -64,10 +64,11 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		if d.isConvertToMP3 {
 			mp3FilePath := fmt.Sprintf("%s/%s.mp3", d.OutputFolder, fileName)
 			err = d.convertMp3(outFilePath, mp3FilePath)
+			_ = os.Remove(outFilePath)
 			if err != nil {
+				_ = os.Remove(mp3FilePath)
 				return err
 			}
-			_ = os.Remove(outFilePath)
 
 			outFilePath = mp3FilePath
 		}

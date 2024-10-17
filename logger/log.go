@@ -94,7 +94,8 @@ func (h *TextHandler) WithGroup(name string) slog.Handler {
 }
 
 func SetLevel(level Level) {
-	handler.level = slog.Level(level)
+	currentLevel = level
+	handler.level = slog.Level(currentLevel)
 }
 
 func GetLevel() Level {
