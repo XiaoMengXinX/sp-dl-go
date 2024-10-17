@@ -15,9 +15,10 @@ func init() {
 }
 
 type Data struct {
-	SpDc              string `json:"sp_dc"`
-	AccessToken       string `json:"accessToken"`
-	AccessTokenExpire int64  `json:"accessTokenExpire"`
+	SpDc              string   `json:"sp_dc"`
+	AccessToken       string   `json:"accessToken"`
+	AccessTokenExpire int64    `json:"accessTokenExpire"`
+	AcceptLanguage    []string `json:"accept-language"`
 }
 
 type Manager struct {
@@ -31,6 +32,7 @@ func NewConfigManager() *Manager {
 		SpDc:              "",
 		AccessToken:       "",
 		AccessTokenExpire: -1,
+		AcceptLanguage:    nil,
 	}
 	return &Manager{
 		configFileName: "config.json",

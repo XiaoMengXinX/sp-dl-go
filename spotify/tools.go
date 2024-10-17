@@ -132,6 +132,24 @@ func cleanFilename(filename string) string {
 	return cleaned
 }
 
+func generateAcceptLanguageHeader(languages []string) string {
+	var result []string
+
+	for i, lang := range languages {
+		if strings.Contains(lang, ";q=") {
+			result = append(result, lang)
+		} else {
+			priority := 1.0 - float64(i)*0.1
+			if priority < 0 {
+				priority = 0
+			}
+			result = append(result, fmt.Sprintf("%s;q=%.1f", lang, priority))
+		}
+	}
+
+	return strings.Join(result, ",")
+}
+
 func (e *fileEntry) testFileIDOrFileId() string {
 	if e.FileID != "" {
 		return e.FileID

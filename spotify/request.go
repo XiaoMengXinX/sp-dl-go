@@ -26,6 +26,10 @@ func (d *Downloader) makeRequest(method, url string, body []byte) ([]byte, error
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
 	req.Header.Set("Accept", "application/json")
 
+	if acceptLanguage := d.TokenManager.ConfigManager.Get().AcceptLanguage; len(acceptLanguage) > 0 {
+		req.Header.Set("accept-language", generateAcceptLanguageHeader(acceptLanguage))
+	}
+
 	log.Debugf("[%s] %s", method, url)
 	log.Debugf("Headers: %+v", req.Header)
 
