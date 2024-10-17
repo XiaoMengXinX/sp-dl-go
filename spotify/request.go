@@ -27,7 +27,7 @@ func (d *Downloader) makeRequest(method, url string, body []byte) ([]byte, error
 	req.Header.Set("Accept", "application/json")
 
 	if acceptLanguage := d.TokenManager.ConfigManager.Get().AcceptLanguage; len(acceptLanguage) > 0 {
-		req.Header.Set("accept-language", generateAcceptLanguageHeader(acceptLanguage))
+		req.Header.Set("Accept-Language", generateAcceptLanguageHeader(acceptLanguage))
 	}
 
 	log.Debugf("[%s] %s", method, url)
