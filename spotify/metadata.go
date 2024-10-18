@@ -93,7 +93,7 @@ func addMp3Id3v2(inputFile, coverFilePath string, metadata map[string]string) (e
 
 	picFile, err := os.ReadFile(coverFilePath)
 	if err != nil {
-		return fmt.Errorf("failrd to read album pic: %v ", err)
+		return fmt.Errorf("failed to read album pic: %v ", err)
 	}
 	if len(picFile) > 32 {
 		mime := http.DetectContentType(picFile[:32])
