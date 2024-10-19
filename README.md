@@ -25,3 +25,11 @@ Usage of sp-dl-go:
   -no-metadata
         Skip adding metadata to downloaded files.
 ```
+
+# Notice
+
+- You need to put a [CDM](https://forum.videohelp.com/threads/408031-Dumping-Your-own-L3-CDM-with-Android-Studio) in the `./cdm` directory for mp4 decryption.
+
+- Get your `sp_dc` cookie value from somewhere and enter it to the terminal at your first run.
+
+- OGG decryption may not always work because the platform occasionally updates the decryption token or something, which is not easy to obtain.
