@@ -6,6 +6,7 @@ import (
 	"github.com/bogem/id3v2"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -32,10 +33,11 @@ func (d *Downloader) AddMetadata(trackMD trackMetadata, filePath string) (err er
 	metadata["album_artist"] = formatArtistsStr(album.Artists)
 	for _, copyright := range album.Copyrights {
 		if copyright.Type == "P" {
-			if !strings.HasPrefix(copyright.Text, "℗") {
-				metadata["copyright"] = fmt.Sprintf("℗ %s", copyright.Text)
+			cr := strings.Replace(copyright.Text, "(P)", "℗", 1)
+			if !strings.HasPrefix(cr, "℗") {
+				metadata["copyright"] = fmt.Sprintf("℗ %s", cr)
 			} else {
-				metadata["copyright"] = copyright.Text
+				metadata["copyright"] = cr
 			}
 			break
 		}
@@ -61,7 +63,7 @@ func (d *Downloader) AddMetadata(trackMD trackMetadata, filePath string) (err er
 	log.Debugf("Serialized metadata: %+v", metadata)
 
 	coverFileName, err := d.downloadCoverImage(trackMD)
-	coverFilePath := fmt.Sprintf("%s/%s", d.OutputFolder, coverFileName)
+	coverFilePath := filepath.Join(d.OutputFolder, coverFileName)
 	defer os.Remove(coverFilePath)
 
 	if err != nil {

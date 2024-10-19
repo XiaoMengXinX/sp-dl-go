@@ -2,10 +2,12 @@ package spotify
 
 import (
 	"fmt"
+	"github.com/XiaoMengXinX/SimpleDownloader"
 	log "github.com/XiaoMengXinX/sp-dl-go/logger"
 	"github.com/XiaoMengXinX/sp-dl-go/playplay"
 	widevine "github.com/iyear/gowidevine"
 	"os"
+	"path/filepath"
 )
 
 func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
@@ -45,7 +47,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	}
 
 	fileName := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
-	outFilePath := fmt.Sprintf("%s/%s.%s", d.OutputFolder, fileName, format)
+	outFilePath := fmt.Sprintf("%s.%s", filepath.Join(d.OutputFolder, fileName), format)
 
 	log.Infof("Downloading %s [%s]", content, fileName)
 
@@ -62,7 +64,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 
 	if hasFFmpeg {
 		if d.isConvertToMP3 {
-			mp3FilePath := fmt.Sprintf("%s/%s.mp3", d.OutputFolder, fileName)
+			mp3FilePath := fmt.Sprintf("%s.mp3", filepath.Join(d.OutputFolder, fileName))
 			err = d.convertMp3(outFilePath, mp3FilePath)
 			_ = os.Remove(outFilePath)
 			if err != nil {
@@ -94,8 +96,8 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 
 func (d *Downloader) downloadAndDecrypt(fileName string, format string, fileID string) (err error) {
 	tmpFileName := fmt.Sprintf("%s.%s.tmp", fileName, format)
-	tmpFilePath := fmt.Sprintf("%s/%s", d.OutputFolder, tmpFileName)
-	outFilePath := fmt.Sprintf("%s/%s.%s", d.OutputFolder, fileName, format)
+	tmpFilePath := filepath.Join(d.OutputFolder, tmpFileName)
+	outFilePath := fmt.Sprintf("%s.%s", filepath.Join(d.OutputFolder, fileName), format)
 
 	defer func(filename string, filePath string, err *error) {
 		if *err != nil {
@@ -104,12 +106,15 @@ func (d *Downloader) downloadAndDecrypt(fileName string, format string, fileID s
 		}
 	}(fileName, outFilePath, &err)
 
-	cdnURL, err := d.requestCDNURL(fileID)
+	cdnUrl, err := d.requestCDNURL(fileID)
 	if err != nil {
 		return err
 	}
 
-	err = d.downloadURL(cdnURL, tmpFileName)
+	dl := downloader.NewDownloader().SetSavePath(d.OutputFolder).SetDownloadRoutine(4)
+	task, _ := dl.NewDownloadTask(cdnUrl)
+	err = task.SetFileName(tmpFileName).Download()
+	// err = d.downloadURL(cdnUrl, tmpFileName)
 	defer os.Remove(tmpFilePath)
 	if err != nil {
 		return err
