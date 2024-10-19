@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
-	config := flag.String("c", "config.json", "Path to config file")
+	showHelp := flag.Bool("help", false, "Show this help message.")
 	id := flag.String("id", "", "Spotify URL/URI/ID (required). Example usage: -id https://open.spotify.com/track/4jTrKMoc44RYZsoFsIlQev")
 	quality := flag.String("quality", spotify.Quality128MP4Dual, "Quality level. Options: MP4_128, MP4_128_DUAL, MP4_256, MP4_256_DUAL, OGG_VORBIS_320, OGG_VORBIS_160, OGG_VORBIS_96")
 	output := flag.String("output", "./output", "Output path.")
+	config := flag.String("c", "config.json", "Path to config file")
 	debug := flag.Bool("debug", false, "Print debug information. Use this to enable more detailed logging for troubleshooting.")
 	isConvertToMP3 := flag.Bool("mp3", false, "Convert downloaded music to mp3 format")
 	isSkipAddingMetadata := flag.Bool("no-metadata", false, "Skip adding metadata to downloaded files.")
-	showHelp := flag.Bool("help", false, "Show this help message.")
 
 	flag.Parse()
 
