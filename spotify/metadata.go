@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (d *Downloader) AddMetadata(trackMD trackMetadata, filePath string) (err error) {
+func (d *Downloader) addMetadata(trackMD trackMetadata, filePath string) (err error) {
 	trackID := SpHexToID(trackMD.GID)
 	log.Debugf("trackID: %s", trackMD.GID)
 	log.Debugf("ID: %s", SpHexToID(trackMD.GID))

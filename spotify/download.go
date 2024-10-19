@@ -76,7 +76,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		}
 
 		if !d.isSkipAddingMetadata && (d.isConvertToMP3 || format == "m4a") && content == TRACK {
-			err = d.AddMetadata(metadata, outFilePath)
+			err = d.addMetadata(metadata, outFilePath)
 			if err != nil {
 				return err
 			}
@@ -184,7 +184,7 @@ func (d *Downloader) Download(url string) (err error) {
 
 	log.Infof("Downloading %d track(s)", len(tracks))
 
-	_, idType, _ := getIDType(url)
+	_, idType, _ := GetIDType(url)
 
 	log.Debugf("Track type: %s", idType)
 

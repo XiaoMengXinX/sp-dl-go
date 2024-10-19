@@ -85,7 +85,7 @@ func (d *Downloader) SkipAddingMetadata(b bool) *Downloader {
 }
 
 func (d *Downloader) GetTracks(url string) ([]string, error) {
-	url, idType, err := getIDType(url)
+	url, idType, err := GetIDType(url)
 	if err != nil {
 		log.Debugf("Get IDType Failed: %v", err)
 		return nil, err

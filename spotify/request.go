@@ -62,7 +62,7 @@ func (d *Downloader) downloadURL(url, filename string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to execute request: %v", err)
+		return fmt.Errorf("request failed: %v", err)
 	}
 	defer resp.Body.Close()
 

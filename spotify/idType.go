@@ -16,7 +16,7 @@ const (
 	EPISODE  IDType = "episode"
 )
 
-func getIDType(urlID string) (string, IDType, error) {
+func GetIDType(urlID string) (string, IDType, error) {
 	if strings.HasPrefix(urlID, "http") {
 		parsedURL, err := url.Parse(urlID)
 		if err != nil {
