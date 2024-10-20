@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
+func (d *Downloader) downloadContent(ID string, content IDType) (outFilePath string, err error) {
 	var name, artist, fileID, format string
 	var metadata trackMetadata
 
@@ -23,7 +23,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 					log.Errorln((*err).Error())
 				}
 			}(ID, &err)
-			return fmt.Errorf("failed to get metadata of trackID [%s]: %v", ID, err)
+			return outFilePath, fmt.Errorf("failed to get metadata of trackID [%s]: %v", ID, err)
 		}
 	case EPISODE:
 		name, artist, fileID, _, err = d.getEpisodeMetadata(ID)
@@ -33,10 +33,10 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 					log.Errorln((*err).Error())
 				}
 			}(ID, &err)
-			return fmt.Errorf("failed to get metadata of episodeID [%s]: %v", ID, err)
+			return outFilePath, fmt.Errorf("failed to get metadata of episodeID [%s]: %v", ID, err)
 		}
 	default:
-		return fmt.Errorf("invalid content type")
+		return outFilePath, fmt.Errorf("invalid content type")
 	}
 
 	switch {
@@ -47,13 +47,13 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	}
 
 	fileName := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
-	outFilePath := fmt.Sprintf("%s.%s", filepath.Join(d.OutputFolder, fileName), format)
+	outFilePath = fmt.Sprintf("%s.%s", filepath.Join(d.OutputFolder, fileName), format)
 
 	log.Infof("Downloading %s [%s]", content, fileName)
 
 	err = d.downloadAndDecrypt(fileName, format, fileID)
 	if err != nil {
-		return err
+		return outFilePath, err
 	}
 
 	defer func(filename string, err *error) {
@@ -69,7 +69,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 			_ = os.Remove(outFilePath)
 			if err != nil {
 				_ = os.Remove(mp3FilePath)
-				return err
+				return outFilePath, err
 			}
 
 			outFilePath = mp3FilePath
@@ -78,7 +78,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 		if !d.isSkipAddingMetadata && (d.isConvertToMP3 || format == "m4a") && content == TRACK {
 			err = d.addMetadata(metadata, outFilePath)
 			if err != nil {
-				return err
+				return outFilePath, err
 			}
 		}
 	} else {
@@ -91,7 +91,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (err error) {
 	}
 
 	log.Infof("Download %s [%s] successfully", content, fileName)
-	return nil
+	return
 }
 
 func (d *Downloader) downloadAndDecrypt(fileName string, format string, fileID string) (err error) {
@@ -163,11 +163,11 @@ func (d *Downloader) downloadAndDecrypt(fileName string, format string, fileID s
 	return
 }
 
-func (d *Downloader) DownloadTrack(ID string) (err error) {
+func (d *Downloader) DownloadTrack(ID string) (downloadFilePath string, err error) {
 	return d.downloadContent(ID, TRACK)
 }
 
-func (d *Downloader) DownloadEpisode(ID string) (err error) {
+func (d *Downloader) DownloadEpisode(ID string) (downloadFilePath string, err error) {
 	return d.downloadContent(ID, EPISODE)
 }
 
@@ -191,9 +191,9 @@ func (d *Downloader) Download(url string) (err error) {
 	for _, track := range tracks {
 		switch idType {
 		case TRACK, ALBUM, PLAYLIST:
-			_ = d.DownloadTrack(track)
+			_, _ = d.DownloadTrack(track)
 		case SHOW, EPISODE:
-			_ = d.DownloadEpisode(track)
+			_, _ = d.DownloadEpisode(track)
 		}
 	}
 	return nil
