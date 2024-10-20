@@ -159,9 +159,9 @@ func (e *fileEntry) testFileIDOrFileId() string {
 
 func (d *Downloader) isSupportedFormat(format string) bool {
 	switch {
-	case mp4FormatSet[d.preferQuality]:
+	case mp4FormatSet[d.quality]:
 		return mp4FormatSet[format]
-	case oggFormatSet[d.preferQuality]:
+	case oggFormatSet[d.quality]:
 		return oggFormatSet[format]
 	default:
 		return false
@@ -170,8 +170,7 @@ func (d *Downloader) isSupportedFormat(format string) bool {
 
 func (d *Downloader) selectFromQuality(entries []fileEntry) (string, error) {
 	for _, entry := range entries {
-		if entry.Format == d.preferQuality {
-			d.quality = entry.Format
+		if entry.Format == d.quality {
 			return entry.testFileIDOrFileId(), nil
 		}
 	}
@@ -179,8 +178,7 @@ func (d *Downloader) selectFromQuality(entries []fileEntry) (string, error) {
 
 	for _, entry := range entries {
 		if d.isSupportedFormat(entry.Format) {
-			log.Debugf("Selected new format: %s", entry.Format)
-			d.quality = entry.Format
+			log.Debugf("Selected new quality: %s", entry.Format)
 			return entry.testFileIDOrFileId(), nil
 		}
 	}
