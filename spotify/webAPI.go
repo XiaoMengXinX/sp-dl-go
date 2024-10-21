@@ -7,6 +7,43 @@ import (
 	"net/http"
 )
 
+func (d *Downloader) WebAPIGetTrackInfo(trackID string) (WebAPITrackInfo, error) {
+	track, err := d.getTrackAPI(trackID)
+	if err != nil {
+		return WebAPITrackInfo{}, fmt.Errorf("failed to fetch track data: %v", err)
+	}
+	var trackInfo WebAPITrackInfo
+	trackInfo.Name = track.Name
+	trackInfo.DurationMS = track.DurationMS
+	trackInfo.Artists = make([]WebAPIArtist, len(track.Artists))
+	for i, artist := range track.Artists {
+		trackInfo.Artists[i] = WebAPIArtist{
+			Name: artist.Name,
+			ID:   artist.ID,
+		}
+	}
+	trackInfo.WebAPIAlbumInfo = WebAPIAlbumInfo{
+		ID:      track.Album.ID,
+		Name:    track.Album.Name,
+		Artists: make([]WebAPIArtist, len(track.Album.Artists)),
+		Images:  make([]WebAPICoverImage, len(track.Album.Images)),
+	}
+	for i, artist := range track.Album.Artists {
+		trackInfo.WebAPIAlbumInfo.Artists[i] = WebAPIArtist{
+			Name: artist.Name,
+			ID:   artist.ID,
+		}
+	}
+	for i, img := range track.Album.Images {
+		trackInfo.WebAPIAlbumInfo.Images[i] = WebAPICoverImage{
+			URL:    img.URL,
+			Width:  img.Width,
+			Height: img.Height,
+		}
+	}
+	return trackInfo, nil
+}
+
 func (d *Downloader) getAlbumTracksAPI(albumID string, offset int) (albumTracksData, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/albums/%s/tracks?offset=%d&limit=50", albumID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)

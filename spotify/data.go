@@ -1,5 +1,30 @@
 package spotify
 
+type WebAPITrackInfo struct {
+	WebAPIAlbumInfo
+	Artists    []WebAPIArtist
+	DurationMS int
+	Name       string
+}
+
+type WebAPIAlbumInfo struct {
+	ID      string
+	Images  []WebAPICoverImage
+	Name    string
+	Artists []WebAPIArtist
+}
+
+type WebAPICoverImage struct {
+	URL    string
+	Width  int
+	Height int
+}
+
+type WebAPIArtist struct {
+	Name string
+	ID   string
+}
+
 type albumTracksData struct {
 	Items []struct {
 		Id string `json:"id"`
@@ -30,12 +55,14 @@ type showTracksData struct {
 }
 
 type albumData struct {
-	Type                 string            `json:"album_type"`
-	TotalTracks          int               `json:"total_tracks"`
-	Name                 string            `json:"name"`
-	ReleaseDate          string            `json:"release_date"`
-	ReleaseDatePrecision string            `json:"release_date_precision"`
-	Artists              []artistDataBasic `json:"artists"`
+	Type                 string           `json:"album_type"`
+	TotalTracks          int              `json:"total_tracks"`
+	ID                   string           `json:"id"`
+	Name                 string           `json:"name"`
+	ReleaseDate          string           `json:"release_date"`
+	ReleaseDatePrecision string           `json:"release_date_precision"`
+	Artists              []artistData     `json:"artists"`
+	Images               []albumImageData `json:"images"`
 	Copyrights           []struct {
 		Text string `json:"text"`
 		Type string `json:"type"`
@@ -50,17 +77,9 @@ type albumData struct {
 }
 
 type trackData struct {
-	Album struct {
-		Type                 string            `json:"album_type"`
-		TotalTracks          int               `json:"total_tracks"`
-		ID                   string            `json:"id"`
-		Name                 string            `json:"name"`
-		ReleaseDate          string            `json:"release_date"`
-		ReleaseDatePrecision string            `json:"release_date_precision"`
-		Artists              []artistDataBasic `json:"artists"`
-	} `json:"album"`
-	Artists     []artistDataBasic `json:"artists"`
-	DurationMs  int               `json:"duration_ms"`
+	Album       albumData    `json:"album"`
+	Artists     []artistData `json:"artists"`
+	DurationMS  int          `json:"duration_ms"`
 	ExternalIDs struct {
 		ISRC string `json:"isrc"`
 		EAN  string `json:"ean"`
@@ -76,16 +95,11 @@ type trackMetadata struct {
 	Album struct {
 		Name       string `json:"name"`
 		CoverGroup struct {
-			Image []struct {
-				FileId string `json:"file_id"`
-				Size   string `json:"size"`
-				Width  int    `json:"width"`
-				Height int    `json:"height"`
-			} `json:"image"`
+			Image []albumImageData `json:"image"`
 		} `json:"cover_group"`
 	} `json:"album"`
-	Artists []artistDataBasic `json:"artist"`
-	File    []fileEntry       `json:"file"`
+	Artists []artistData `json:"artist"`
+	File    []fileEntry  `json:"file"`
 	AltFile []struct {
 		File []fileEntry `json:"file"`
 	} `json:"alternative,omitempty"`
@@ -109,16 +123,24 @@ type episodeMetadata struct {
 	} `json:"data"`
 }
 
-type artistDataBasic struct {
+type artistData struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
+}
+
+type albumImageData struct {
+	FileId string `json:"file_id"`
+	URL    string `json:"url"`
+	Size   string `json:"size"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 type cdnURL struct {
 	Result string   `json:"result"`
 	CdnURL []string `json:"cdnurl"`
 	Fileid string   `json:"fileid"`
-	Ttl    int      `json:"ttl"`
+	TTL    int      `json:"ttl"`
 }
 
 type fileEntry struct {

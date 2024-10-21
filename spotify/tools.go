@@ -92,7 +92,7 @@ func checkDirExist(dirPath string) error {
 	return nil
 }
 
-func formatArtistsStr(artists []artistDataBasic) string {
+func formatArtistsStr(artists []artistData) string {
 	if len(artists) == 0 {
 		return ""
 	}
