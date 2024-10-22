@@ -15,11 +15,13 @@ func (d *Downloader) WebAPIGetTrackInfo(trackID string) (WebAPITrackInfo, error)
 	var trackInfo WebAPITrackInfo
 	trackInfo.Name = track.Name
 	trackInfo.DurationMS = track.DurationMS
+	trackInfo.URL = track.ExternalUrls.Spotify
 	trackInfo.Artists = make([]WebAPIArtist, len(track.Artists))
 	for i, artist := range track.Artists {
 		trackInfo.Artists[i] = WebAPIArtist{
 			Name: artist.Name,
 			ID:   artist.ID,
+			URL:  artist.ExternalUrls.Spotify,
 		}
 	}
 	trackInfo.WebAPIAlbumInfo = WebAPIAlbumInfo{
@@ -27,11 +29,13 @@ func (d *Downloader) WebAPIGetTrackInfo(trackID string) (WebAPITrackInfo, error)
 		Name:    track.Album.Name,
 		Artists: make([]WebAPIArtist, len(track.Album.Artists)),
 		Images:  make([]WebAPICoverImage, len(track.Album.Images)),
+		URL:     track.Album.ExternalUrls.Spotify,
 	}
 	for i, artist := range track.Album.Artists {
 		trackInfo.WebAPIAlbumInfo.Artists[i] = WebAPIArtist{
 			Name: artist.Name,
 			ID:   artist.ID,
+			URL:  artist.ExternalUrls.Spotify,
 		}
 	}
 	for i, img := range track.Album.Images {

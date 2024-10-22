@@ -5,6 +5,7 @@ type WebAPITrackInfo struct {
 	Artists    []WebAPIArtist
 	DurationMS int
 	Name       string
+	URL        string
 }
 
 type WebAPIAlbumInfo struct {
@@ -12,6 +13,7 @@ type WebAPIAlbumInfo struct {
 	Images  []WebAPICoverImage
 	Name    string
 	Artists []WebAPIArtist
+	URL     string
 }
 
 type WebAPICoverImage struct {
@@ -23,6 +25,7 @@ type WebAPICoverImage struct {
 type WebAPIArtist struct {
 	Name string
 	ID   string
+	URL  string
 }
 
 type albumTracksData struct {
@@ -55,6 +58,9 @@ type showTracksData struct {
 }
 
 type albumData struct {
+	ExternalUrls struct {
+		Spotify string `json:"spotify"`
+	} `json:"external_urls"`
 	Type                 string           `json:"album_type"`
 	TotalTracks          int              `json:"total_tracks"`
 	ID                   string           `json:"id"`
@@ -77,6 +83,9 @@ type albumData struct {
 }
 
 type trackData struct {
+	ExternalUrls struct {
+		Spotify string `json:"spotify"`
+	} `json:"external_urls"`
 	Album       albumData    `json:"album"`
 	Artists     []artistData `json:"artists"`
 	DurationMS  int          `json:"duration_ms"`
@@ -124,6 +133,9 @@ type episodeMetadata struct {
 }
 
 type artistData struct {
+	ExternalUrls struct {
+		Spotify string `json:"spotify"`
+	} `json:"external_urls"`
 	Name string `json:"name"`
 	ID   string `json:"id"`
 }
