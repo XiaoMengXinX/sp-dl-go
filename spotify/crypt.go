@@ -76,16 +76,14 @@ func (d *Downloader) getMp4Keys(psshStr string) ([]*widevine.Key, error) {
 }
 
 func (d *Downloader) getOggKeys(fileID string) (key [16]byte, err error) {
-	protoInt32 := func(i int32) *int32 { return &i }
-	protoInteractivity := func(i playplay.Interactivity) *playplay.Interactivity { return &i }
-	protoContentType := func(c playplay.ContentType) *playplay.ContentType { return &c }
-
+	protoVersion := int32(2)
 	reqToken, _ := hex.DecodeString(playplay.PlayPlayToken)
+
 	req := &playplay.PlayPlayLicenseRequest{
-		Version:       protoInt32(2),
+		Version:       &protoVersion,
 		Token:         reqToken,
-		Interactivity: protoInteractivity(playplay.Interactivity_INTERACTIVE),
-		ContentType:   protoContentType(playplay.ContentType_AUDIO_TRACK),
+		Interactivity: playplay.Interactivity_INTERACTIVE.Enum(),
+		ContentType:   playplay.ContentType_AUDIO_TRACK.Enum(),
 	}
 	body, err := proto.Marshal(req)
 	if err != nil {
