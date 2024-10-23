@@ -102,7 +102,7 @@ func (d *Downloader) GetTracks(url string) ([]string, error) {
 }
 
 func (d *Downloader) fetchAlbumTracks(albumID string, offset int, tracks []string) ([]string, error) {
-	albumData, err := d.getAlbumTracksAPI(albumID, offset)
+	albumData, err := d.queryAlbumTracksAPI(albumID, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (d *Downloader) fetchAlbumTracks(albumID string, offset int, tracks []strin
 }
 
 func (d *Downloader) fetchPlaylistTracks(playlistID string, offset int, tracks []string) ([]string, error) {
-	playlistData, err := d.getPlaylistTracksAPI(playlistID, offset)
+	playlistData, err := d.queryPlaylistTracksAPI(playlistID, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (d *Downloader) fetchPlaylistTracks(playlistID string, offset int, tracks [
 }
 
 func (d *Downloader) fetchShowEpisodes(showID string, offset int, episodes []string) ([]string, error) {
-	showData, err := d.getShowTracksAPI(showID, offset)
+	showData, err := d.queryShowTracksAPI(showID, offset)
 	if err != nil {
 		return nil, err
 	}

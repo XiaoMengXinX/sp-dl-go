@@ -15,12 +15,12 @@ func (d *Downloader) addMetadata(trackMD trackMetadata, filePath string) (err er
 	log.Debugf("trackID: %s", trackMD.GID)
 	log.Debugf("ID: %s", SpHexToID(trackMD.GID))
 
-	track, err := d.getTrackAPI(trackID)
+	track, err := d.queryTrackAPI(trackID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch track data: %w", err)
 	}
 
-	album, err := d.getAlbumAPI(track.Album.ID)
+	album, err := d.queryAlbumAPI(track.Album.ID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch album data: %w", err)
 	}

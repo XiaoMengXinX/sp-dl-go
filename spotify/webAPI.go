@@ -8,7 +8,7 @@ import (
 )
 
 func (d *Downloader) WebAPIGetTrackInfo(trackID string) (WebAPITrackInfo, error) {
-	track, err := d.getTrackAPI(trackID)
+	track, err := d.queryTrackAPI(trackID)
 	if err != nil {
 		return WebAPITrackInfo{}, fmt.Errorf("failed to fetch track data: %v", err)
 	}
@@ -48,7 +48,7 @@ func (d *Downloader) WebAPIGetTrackInfo(trackID string) (WebAPITrackInfo, error)
 	return trackInfo, nil
 }
 
-func (d *Downloader) getAlbumTracksAPI(albumID string, offset int) (albumTracksData, error) {
+func (d *Downloader) queryAlbumTracksAPI(albumID string, offset int) (albumTracksData, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/albums/%s/tracks?offset=%d&limit=50", albumID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -63,7 +63,7 @@ func (d *Downloader) getAlbumTracksAPI(albumID string, offset int) (albumTracksD
 	return albumTracks, nil
 }
 
-func (d *Downloader) getPlaylistTracksAPI(playlistID string, offset int) (playlistTracksData, error) {
+func (d *Downloader) queryPlaylistTracksAPI(playlistID string, offset int) (playlistTracksData, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/playlists/%s/tracks?offset=%d&limit=100", playlistID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -78,7 +78,7 @@ func (d *Downloader) getPlaylistTracksAPI(playlistID string, offset int) (playli
 	return playlistTracks, nil
 }
 
-func (d *Downloader) getShowTracksAPI(showID string, offset int) (showTracksData, error) {
+func (d *Downloader) queryShowTracksAPI(showID string, offset int) (showTracksData, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/shows/%s/episodes?offset=%d&limit=50", showID, offset)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -93,7 +93,7 @@ func (d *Downloader) getShowTracksAPI(showID string, offset int) (showTracksData
 	return showTracks, nil
 }
 
-func (d *Downloader) getAlbumAPI(albumID string) (albumData, error) {
+func (d *Downloader) queryAlbumAPI(albumID string) (albumData, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/albums/%s", albumID)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -108,7 +108,7 @@ func (d *Downloader) getAlbumAPI(albumID string) (albumData, error) {
 	return album, nil
 }
 
-func (d *Downloader) getTrackAPI(trackID string) (trackData, error) {
+func (d *Downloader) queryTrackAPI(trackID string) (trackData, error) {
 	url := fmt.Sprintf("https://api.spotify.com/v1/tracks/%s", trackID)
 	data, err := d.makeRequest(http.MethodGet, url, nil)
 	if err != nil {
