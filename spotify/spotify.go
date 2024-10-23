@@ -50,7 +50,7 @@ func NewDownloader() *Downloader {
 	return &Downloader{
 		TokenManager: token.NewTokenManager(),
 		quality:      Quality128MP4Dual,
-		outputFolder: "./output",
+		outputFolder: filepath.Clean("./output"),
 	}
 }
 
