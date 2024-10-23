@@ -6,6 +6,7 @@ import (
 	log "github.com/XiaoMengXinX/sp-dl-go/logger"
 	"github.com/XiaoMengXinX/sp-dl-go/token"
 	"net/http"
+	"path/filepath"
 )
 
 const (
@@ -35,11 +36,11 @@ var (
 
 type Downloader struct {
 	TokenManager *token.Manager
-	OutputFolder string
 
-	quality     string
-	clientBases []string
-	licenseURL  string
+	outputFolder string
+	quality      string
+	clientBases  []string
+	licenseURL   string
 
 	isConvertToMP3       bool
 	isSkipAddingMetadata bool
@@ -49,7 +50,7 @@ func NewDownloader() *Downloader {
 	return &Downloader{
 		TokenManager: token.NewTokenManager(),
 		quality:      Quality128MP4Dual,
-		OutputFolder: "./output",
+		outputFolder: "./output",
 	}
 }
 
@@ -59,7 +60,7 @@ func (d *Downloader) Initialize() *Downloader {
 	d.clientBases = requestClientBases()
 	d.licenseURL = buildLicenseURL(d.clientBases)
 	_ = readCDMs()
-	if err := checkDirExist(d.OutputFolder); err != nil {
+	if err := checkDirExist(d.outputFolder); err != nil {
 		log.Fatalln(err)
 	}
 	return d
@@ -70,6 +71,11 @@ func (d *Downloader) SetQuality(quality string) error {
 		return fmt.Errorf("%s is not a valid quality format", quality)
 	}
 	d.quality = quality
+	return nil
+}
+
+func (d *Downloader) SetOutputPath(outputPath string) *Downloader {
+	d.outputFolder = filepath.Clean(outputPath)
 	return nil
 }
 

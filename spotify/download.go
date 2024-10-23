@@ -47,7 +47,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (outFilePath str
 	}
 
 	fileName := cleanFilename(fmt.Sprintf("%s - %s", name, artist))
-	outFilePath = fmt.Sprintf("%s.%s", filepath.Join(d.OutputFolder, fileName), format)
+	outFilePath = fmt.Sprintf("%s.%s", filepath.Join(d.outputFolder, fileName), format)
 
 	log.Infof("Downloading %s [%s]", content, fileName)
 
@@ -64,7 +64,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (outFilePath str
 
 	if hasFFmpeg {
 		if d.isConvertToMP3 {
-			mp3FilePath := fmt.Sprintf("%s.mp3", filepath.Join(d.OutputFolder, fileName))
+			mp3FilePath := fmt.Sprintf("%s.mp3", filepath.Join(d.outputFolder, fileName))
 			err = d.convertMp3(outFilePath, mp3FilePath)
 			_ = os.Remove(outFilePath)
 			if err != nil {
@@ -96,8 +96,8 @@ func (d *Downloader) downloadContent(ID string, content IDType) (outFilePath str
 
 func (d *Downloader) downloadAndDecrypt(fileName string, format string, fileID string) (err error) {
 	tmpFileName := fmt.Sprintf("%s.%s.tmp", fileName, format)
-	tmpFilePath := filepath.Join(d.OutputFolder, tmpFileName)
-	outFilePath := fmt.Sprintf("%s.%s", filepath.Join(d.OutputFolder, fileName), format)
+	tmpFilePath := filepath.Join(d.outputFolder, tmpFileName)
+	outFilePath := fmt.Sprintf("%s.%s", filepath.Join(d.outputFolder, fileName), format)
 
 	defer func(filename string, filePath string, err *error) {
 		if *err != nil {
@@ -111,7 +111,7 @@ func (d *Downloader) downloadAndDecrypt(fileName string, format string, fileID s
 		return err
 	}
 
-	dl := downloader.NewDownloader().SetSavePath(d.OutputFolder).SetDownloadRoutine(4)
+	dl := downloader.NewDownloader().SetSavePath(d.outputFolder).SetDownloadRoutine(4)
 	task, _ := dl.NewDownloadTask(cdnUrl)
 	err = task.SetFileName(tmpFileName).Download()
 	// err = d.downloadURL(cdnUrl, tmpFileName)

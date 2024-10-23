@@ -40,7 +40,7 @@ func main() {
 	sp.TokenManager.ConfigManager.SetConfigPath(*config)
 	log.Infof("Set Config Path: %s", *config)
 
-	sp.OutputFolder = *output
+	sp.SetOutputPath(*output)
 	log.Infof("Set Output path: %s", *output)
 
 	if err := sp.SetQuality(*quality); err != nil {

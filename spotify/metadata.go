@@ -63,7 +63,7 @@ func (d *Downloader) addMetadata(trackMD trackMetadata, filePath string) (err er
 	log.Debugf("Serialized metadata: %+v", metadata)
 
 	coverFileName, err := d.downloadCoverImage(trackMD)
-	coverFilePath := filepath.Join(d.OutputFolder, coverFileName)
+	coverFilePath := filepath.Join(d.outputFolder, coverFileName)
 	defer os.Remove(coverFilePath)
 
 	if err != nil {

@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+var spBase62Charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 func buildQueryParams(params map[string]interface{}) string {
 	values := url.Values{}
 
@@ -34,11 +36,9 @@ func buildQueryParams(params map[string]interface{}) string {
 }
 
 func SpIDToHex(spotifyID string) string {
-	base62Charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-	dictionary := make(map[byte]int64, len(base62Charset))
-	for i := 0; i < len(base62Charset); i++ {
-		dictionary[base62Charset[i]] = int64(i)
+	dictionary := make(map[byte]int64, len(spBase62Charset))
+	for i := 0; i < len(spBase62Charset); i++ {
+		dictionary[spBase62Charset[i]] = int64(i)
 	}
 
 	base := big.NewInt(62)
@@ -51,15 +51,13 @@ func SpIDToHex(spotifyID string) string {
 }
 
 func SpHexToID(hexStr string) string {
-	base62Charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
 	hexBytes, err := hex.DecodeString(hexStr)
 	if err != nil {
 		return ""
 	}
 	num := new(big.Int).SetBytes(hexBytes)
 	if num.Cmp(big.NewInt(0)) == 0 {
-		return string(base62Charset[0])
+		return string(spBase62Charset[0])
 	}
 
 	base := big.NewInt(62)
@@ -67,7 +65,7 @@ func SpHexToID(hexStr string) string {
 	for num.Cmp(big.NewInt(0)) > 0 {
 		remainder := new(big.Int)
 		num.DivMod(num, base, remainder)
-		result = string(base62Charset[remainder.Int64()]) + result
+		result = string(spBase62Charset[remainder.Int64()]) + result
 	}
 	return fmt.Sprintf("%022s", result)
 }

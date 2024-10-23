@@ -70,11 +70,11 @@ func (d *Downloader) downloadURL(url, filename string) error {
 		return fmt.Errorf("download failed with http code: %d", resp.StatusCode)
 	}
 
-	if err := os.MkdirAll(d.OutputFolder, os.ModePerm); err != nil {
+	if err := os.MkdirAll(d.outputFolder, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create directory: %v", err)
 	}
 
-	file, err := os.Create(filepath.Join(d.OutputFolder, filename))
+	file, err := os.Create(filepath.Join(d.outputFolder, filename))
 	if err != nil {
 		return fmt.Errorf("failed to create file: %v", err)
 	}
