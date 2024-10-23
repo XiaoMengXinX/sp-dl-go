@@ -58,7 +58,7 @@ func (d *Downloader) downloadContent(ID string, content IDType) (outFilePath str
 
 	defer func(filename string, err *error) {
 		if *err != nil {
-			log.Errorf("An error occured while processing [%s]: %v", filename, (*err).Error())
+			log.Errorf("An error occurred while processing [%s]: %v", filename, (*err).Error())
 		}
 	}(fileName, &err)
 
